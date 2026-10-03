@@ -1824,6 +1824,7 @@ body.lightbox-open-v90{
 .language-picker select{appearance:none;-webkit-appearance:none;border:0;outline:0;background:#101824;color:#fff;font-weight:900;font-size:.72rem;padding:4px 18px 4px 4px;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,#9fb0c5 50%),linear-gradient(135deg,#9fb0c5 50%,transparent 50%);background-position:calc(100% - 9px) 50%,calc(100% - 5px) 50%;background-size:4px 4px,4px 4px;background-repeat:no-repeat}
 @media(max-width:760px){.language-picker{margin-left:auto}.language-picker span{display:none}.language-picker select{max-width:76px}.navbar{gap:8px}}
 
+
 </style>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMjAiIGhlaWdodD0iMzIwIiB2aWV3Qm94PSIwIDAgMzIwIDMyMCI+CjxkZWZzPgogPGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZjZjQyIi8+PHN0b3Agb2Zmc2V0PSIuNDgiIHN0b3AtY29sb3I9IiNmZjg5MTgiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNlODRhMDgiLz48L2xpbmVhckdyYWRpZW50PgogPGZpbHRlciBpZD0icyI+PGZlRHJvcFNoYWRvdyBkeD0iMCIgZHk9IjE0IiBzdGREZXZpYXRpb249IjEwIiBmbG9vZC1vcGFjaXR5PSIuNSIvPjwvZmlsdGVyPgo8L2RlZnM+CjxnIGZpbHRlcj0idXJsKCNzKSI+CiA8cGF0aCBkPSJNMzggOTQgTDgyIDQwIEwxNjAgMTggTDIzOCA0MCBMMjgyIDk0IEwyNjYgMjQ0IEwxNjAgMzAyIEw1NCAyNDQgWiIgZmlsbD0iIzBkMTQxZiIgc3Ryb2tlPSIjZmY4YzFjIiBzdHJva2Utd2lkdGg9IjEyIi8+CiA8cGF0aCBkPSJNOTIgODUgTDc1IDM3IEwxMjYgNjYgTDE2MCAxOCBMMTk0IDY2IEwyNDUgMzcgTDIyOCA4NSBaIiBmaWxsPSJ1cmwoI2cpIiBzdHJva2U9IiM0YzI0MDciIHN0cm9rZS13aWR0aD0iOCIvPgogPHRleHQgeD0iMTYwIiB5PSIyMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJEZWphVnUgU2FucyxBcmlhbCBCbGFjayxzYW5zLXNlcmlmIiBmb250LXNpemU9IjExMiIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0idXJsKCNnKSIgc3Ryb2tlPSIjMjUxMTA2IiBzdHJva2Utd2lkdGg9IjkiIHBhaW50LW9yZGVyPSJzdHJva2UiPldCPC90ZXh0Pgo8L2c+Cjwvc3ZnPg==">
 
@@ -2989,20 +2990,38 @@ document.addEventListener('DOMContentLoaded',()=>{
     return s;
   }
 
+
+  function isEnglishTitleBoundary(node){
+    const parent=node && node.parentElement;
+    if(!parent || (parent.tagName!=='H1' && parent.tagName!=='H2')) return false;
+    let next=node.nextSibling;
+    while(next && next.nodeType===Node.TEXT_NODE && !next.nodeValue.trim()) next=next.nextSibling;
+    return !!(next && next.nodeType===Node.ELEMENT_NODE && next.tagName==='SPAN');
+  }
+
   function translateTextNode(node, lang){
     if(!node || !node.parentElement || SKIP.has(node.parentElement.tagName)) return;
     if(node.__wbOriginal===undefined) node.__wbOriginal=node.nodeValue;
     const original=node.__wbOriginal;
     if(!original || !original.trim()) return;
+
     if(lang==='fr'){
       if(node.nodeValue!==original) node.nodeValue=original;
       return;
     }
-    const lead=original.match(/^\\s*/)?.[0]||'';
-    const trail=original.match(/\\s*$/)?.[0]||'';
+
+    const lead=original.match(/^\s*/)?.[0]||'';
+    const trail=original.match(/\s*$/)?.[0]||'';
     const core=original.trim();
     const translated=genericEnglish(core);
-    const wanted=lead+translated+trail;
+
+    let wanted=lead+translated+trail;
+
+    // English only: guarantee one visible separator before the orange <span>.
+    if(isEnglishTitleBoundary(node)){
+      wanted=lead+translated.replace(/\s+$/,'')+'\u00A0';
+    }
+
     if(node.nodeValue!==wanted) node.nodeValue=wanted;
   }
 
@@ -3037,8 +3056,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       el.dataset.searchBilingual='1';
     });
   }
-
-  function applyLanguage(lang){
+function applyLanguage(lang){
     currentLang=lang==='en'?'en':'fr';
     localStorage.setItem('wb-language',currentLang);
     document.documentElement.lang=currentLang;
