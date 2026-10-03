@@ -1994,6 +1994,224 @@ html[lang="en"] .placeholder-clickable-v90::after{
 }
 </style>
 
+
+<style id="image-hover-fullscreen-v102">
+/* ==========================================================
+   V10.2 — Image interaction
+   - normal image at rest
+   - subtle zoom on hover
+   - "Agrandir" only appears in a corner on hover/focus
+   - click opens a clean fullscreen lightbox
+   ========================================================== */
+
+.placeholder-clickable-v90{
+  position:relative;
+  cursor:zoom-in;
+  overflow:hidden;
+  transform:scale(1);
+  transform-origin:center;
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease,
+    border-color .22s ease,
+    filter .22s ease;
+  will-change:transform;
+  filter:none !important;
+}
+
+/* Remove the dark veil that was covering the screenshots. */
+.placeholder-clickable-v90::before{
+  content:"" !important;
+  position:absolute;
+  inset:0;
+  background:transparent !important;
+  opacity:0 !important;
+  pointer-events:none;
+}
+
+/* Small hover badge in the top-right corner. */
+.placeholder-clickable-v90::after{
+  content:"🔍 Agrandir";
+  position:absolute;
+  top:12px;
+  right:12px;
+  bottom:auto;
+  left:auto;
+  z-index:6;
+  padding:7px 10px;
+  border-radius:9px;
+  border:1px solid rgba(255,255,255,.20);
+  background:rgba(7,11,18,.78);
+  color:#fff;
+  font:800 .70rem/1 "Montserrat",sans-serif;
+  letter-spacing:.02em;
+  opacity:0;
+  transform:translateY(-5px);
+  transition:
+    opacity .18s ease,
+    transform .18s ease,
+    background .18s ease;
+  pointer-events:none;
+  box-shadow:0 6px 18px rgba(0,0,0,.22);
+  backdrop-filter:blur(5px);
+}
+
+/* Slightly enlarge the whole image card on hover. */
+.placeholder-clickable-v90:hover,
+.placeholder-clickable-v90:focus-visible{
+  transform:scale(1.025);
+  z-index:8;
+  outline:none;
+  border-color:rgba(255,138,46,.42);
+  box-shadow:0 16px 34px rgba(0,0,0,.28);
+  filter:none !important;
+}
+
+.placeholder-clickable-v90:hover::after,
+.placeholder-clickable-v90:focus-visible::after{
+  opacity:1;
+  transform:translateY(0);
+}
+
+html[lang="en"] .placeholder-clickable-v90::after{
+  content:"🔍 Enlarge";
+}
+
+/* Keep existing captions readable, without darkening the whole screenshot. */
+.placeholder-clickable-v90 > span,
+.placeholder-clickable-v90 .overlay,
+.placeholder-clickable-v90 .visual-overlay{
+  position:absolute;
+  z-index:4;
+}
+
+/* Fullscreen viewer: image itself is the focus, no big framed panel. */
+.img-lightbox-v90{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(2,5,10,.94);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .18s ease, visibility .18s ease;
+  backdrop-filter:blur(10px);
+}
+
+.img-lightbox-v90.open{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+
+.img-lightbox-panel-v90{
+  position:relative;
+  width:96vw;
+  height:94vh;
+  max-width:none;
+  max-height:none;
+  border:0;
+  border-radius:0;
+  overflow:visible;
+  background:transparent;
+  box-shadow:none;
+  transform:scale(.985);
+  transition:transform .18s ease;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.img-lightbox-v90.open .img-lightbox-panel-v90{
+  transform:scale(1);
+}
+
+/* Hide the old title bar; keep only a floating close button. */
+.img-lightbox-topbar-v90{
+  position:fixed;
+  top:18px;
+  right:18px;
+  z-index:10002;
+  display:block;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+
+.img-lightbox-title-v90{
+  display:none;
+}
+
+.img-lightbox-close-v90{
+  appearance:none;
+  -webkit-appearance:none;
+  border:1px solid rgba(255,255,255,.20);
+  background:rgba(8,12,18,.76);
+  color:#fff;
+  border-radius:10px;
+  padding:10px 12px;
+  cursor:pointer;
+  font-weight:900;
+  transition:.16s ease;
+  backdrop-filter:blur(6px);
+}
+
+.img-lightbox-close-v90:hover{
+  background:rgba(24,34,48,.96);
+  border-color:#ff8a2e;
+}
+
+.img-lightbox-image-v90{
+  display:block;
+  width:auto;
+  height:auto;
+  max-width:96vw;
+  max-height:92vh;
+  object-fit:contain;
+  background:transparent;
+  border-radius:10px;
+  box-shadow:0 24px 70px rgba(0,0,0,.45);
+}
+
+body.lightbox-open-v90{
+  overflow:hidden;
+}
+
+/* Touch devices: no permanent badge; click still opens fullscreen. */
+@media (hover:none), (max-width:760px){
+  .placeholder-clickable-v90::after{
+    opacity:0;
+    transform:none;
+  }
+  .placeholder-clickable-v90:focus-visible::after{
+    opacity:1;
+  }
+  .placeholder-clickable-v90:hover{
+    transform:scale(1);
+  }
+  .img-lightbox-v90{
+    padding:8px;
+  }
+  .img-lightbox-panel-v90{
+    width:100vw;
+    height:100vh;
+  }
+  .img-lightbox-image-v90{
+    max-width:98vw;
+    max-height:94vh;
+    border-radius:6px;
+  }
+  .img-lightbox-topbar-v90{
+    top:10px;
+    right:10px;
+  }
+}
+</style>
+
 </head>
 <body>
 <header class="site-nav">
