@@ -2358,6 +2358,23 @@ body.lightbox-open-v90{
 }
 </style>
 
+
+<style id="image-microzoom-v105">
+/* V10.5 — tiny internal crop to hide 1px/2px light seams on screenshots */
+.placeholder-clickable-v90,
+.image-tile.placeholder-clickable-v90,
+.visual-card.placeholder-clickable-v90{
+  background-size:101.2% auto !important;
+  background-position:center center !important;
+  background-repeat:no-repeat !important;
+}
+
+/* On taller cards, keep the tiny crop in both directions. */
+.visual-card.placeholder-clickable-v90{
+  background-size:101.2% 101.2% !important;
+}
+</style>
+
 </head>
 <body>
 <header class="site-nav">
