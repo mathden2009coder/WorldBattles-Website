@@ -1874,21 +1874,6 @@ body.lightbox-open-v90{
 
 
 <style id="worldbattles-expansion-v10">
-/* Accueil — galerie */
-.wb-gallery-v10{background:#0b111a}
-.wb-gallery-grid-v10{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.wb-gallery-card-v10{overflow:hidden;border-radius:16px;border:1px solid #23344a;background:#0d1622;text-decoration:none;color:#fff;transition:transform .2s ease,border-color .2s ease}
-.wb-gallery-card-v10:hover{transform:translateY(-4px);border-color:#ff8d28}
-.wb-gallery-visual-v10{height:210px;display:grid;place-items:center;position:relative;overflow:hidden}
-.wb-gallery-visual-v10:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.05),transparent 45%,rgba(0,0,0,.35))}
-.wb-gallery-visual-v10 span{font-size:4.3rem;filter:drop-shadow(0 12px 20px rgba(0,0,0,.45))}
-.gallery-world-v10 .wb-gallery-visual-v10{background:linear-gradient(135deg,#48200e,#c45a13 55%,#182236)}
-.gallery-zombies-v10 .wb-gallery-visual-v10{background:linear-gradient(135deg,#0c2013,#276637 55%,#0c1511)}
-.gallery-farlands-v10 .wb-gallery-visual-v10{background:linear-gradient(135deg,#101e35,#205486 50%,#193e32)}
-.wb-gallery-caption-v10{display:flex;flex-direction:column;gap:4px;padding:15px 17px}
-.wb-gallery-caption-v10 b{font:400 1.05rem "Russo One",sans-serif}
-.wb-gallery-caption-v10 small{color:#91a2b7;font-weight:700}
-
 /* Accueil — nouveautés */
 .wb-update-grid-v10{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .wb-update-card-v10{display:flex;gap:14px;padding:18px;border:1px solid #20334a;border-radius:15px;background:linear-gradient(180deg,#0e1825,#09111b);text-decoration:none;color:#fff;transition:transform .18s ease,border-color .18s ease}
@@ -1918,20 +1903,10 @@ body.lightbox-open-v90{
 .faq-item-v10 p{margin:0;padding:0 0 15px;color:#9ba9ba;line-height:1.55}
 .faq-item-v10 code{color:#ffad55}
 
-/* Métiers — profils */
-.job-profile-grid-v10{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.job-profile-card-v10{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:14px;border:1px solid #20334a;background:linear-gradient(180deg,#0e1724,#09101a)}
-.job-profile-card-v10>span{font-size:2rem;line-height:1}
-.job-profile-card-v10 h3{margin:0 0 5px;font-size:1rem}
-.job-profile-card-v10 p{margin:0;color:#9ba9ba;line-height:1.5;font-size:.88rem}
-.job-profile-card-v10:last-child{grid-column:1/-1}
-
 @media(max-width:900px){
-  .wb-gallery-grid-v10,.wb-update-grid-v10{grid-template-columns:1fr}
+  .wb-update-grid-v10{grid-template-columns:1fr}
   .wiki-tabs-v84{grid-template-columns:repeat(2,1fr)}
-  .wiki-start-grid-v10,.faq-grid-v10,.job-profile-grid-v10{grid-template-columns:1fr}
-  .job-profile-card-v10:last-child{grid-column:auto}
-  .wb-gallery-visual-v10{height:165px}
+  .wiki-start-grid-v10,.faq-grid-v10{grid-template-columns:1fr}
 }
 </style>
 
@@ -2022,30 +1997,6 @@ body.lightbox-open-v90{
 </div>
 </div>
 </section>
-<section class="section wb-gallery-v10">
-<div class="container">
-  <div class="section-title">
-    <div class="eyebrow">DÉCOUVRE LE SERVEUR</div>
-    <h2>Trois univers. <span>Une seule aventure.</span></h2>
-    <p>Explore les différents modes de WorldBattles et choisis ton prochain objectif.</p>
-  </div>
-  <div class="wb-gallery-grid-v10">
-    <a class="wb-gallery-card-v10 gallery-world-v10" href="pages/worldbattles.html">
-      <div class="wb-gallery-visual-v10"><span>⚔️</span></div>
-      <div class="wb-gallery-caption-v10"><b>WORLDBATTLES</b><small>SandWars • WorldsBattle • PvP</small></div>
-    </a>
-    <a class="wb-gallery-card-v10 gallery-zombies-v10" href="pages/zombies.html">
-      <div class="wb-gallery-visual-v10"><span>🧟</span></div>
-      <div class="wb-gallery-caption-v10"><b>ZOMBIES</b><small>Bâtiment militaire • 100 kills</small></div>
-    </a>
-    <a class="wb-gallery-card-v10 gallery-farlands-v10" href="pages/farlands.html">
-      <div class="wb-gallery-visual-v10"><span>🌌</span></div>
-      <div class="wb-gallery-caption-v10"><b>FARLANDS</b><small>Construction • Minage • Métiers</small></div>
-    </a>
-  </div>
-</div>
-</section>
-
 <section class="section dark wb-updates-v10">
 <div class="container">
   <div class="section-title">
@@ -2202,22 +2153,7 @@ body.lightbox-open-v90{
 <a class="panel" href="../index.html"><h3>← ACCUEIL</h3><p>Retour aux trois modes de jeu.</p></a>
 </div></div></section>
 </main></section><section class="spa-page " data-route="jobs"><main><section class="page-hero"><div class="container"><div class="eyebrow">FARLANDS • PROGRESSION</div><h1>Les <span>Métiers</span></h1><p>7 métiers, 50 niveaux chacun, 350 récompenses. Choisis ton métier et prépare les paliers que tu veux farmer.</p></div></section>
-<section class="section jobs-v66-intro jobs-profiles-v10"><div class="container">
-<div class="section-title">
-  <div class="eyebrow">CHOISIS TON STYLE</div>
-  <h2>Quel métier te <span>correspond ?</span></h2>
-  <p>Chaque métier récompense une façon différente de jouer dans Farlands.</p>
-</div>
-<div class="job-profile-grid-v10">
-  <div class="job-profile-card-v10"><span>⛏️</span><div><h3>Mineur</h3><p>Pour ceux qui passent leur temps sous terre à chercher minerais et ressources rares.</p></div></div>
-  <div class="job-profile-card-v10"><span>🪓</span><div><h3>Bûcheron</h3><p>Pour les joueurs qui récoltent du bois et préparent leurs matériaux de construction.</p></div></div>
-  <div class="job-profile-card-v10"><span>🌾</span><div><h3>Fermier</h3><p>Pour ceux qui aiment les cultures, l’agriculture et les grandes fermes.</p></div></div>
-  <div class="job-profile-card-v10"><span>⚔️</span><div><h3>Chasseur</h3><p>Pour les joueurs orientés combat qui éliminent les créatures rencontrées en aventure.</p></div></div>
-  <div class="job-profile-card-v10"><span>🎣</span><div><h3>Pêcheur</h3><p>Pour une progression plus calme basée sur la pêche et les prises réussies.</p></div></div>
-  <div class="job-profile-card-v10"><span>🧭</span><div><h3>Explorateur</h3><p>Pour ceux qui aiment parcourir le monde à pied, en bateau, à cheval ou en Elytra.</p></div></div>
-  <div class="job-profile-card-v10"><span>🧱</span><div><h3>Constructeur</h3><p>Pour les bâtisseurs qui développent leur base et donnent vie au Monde Principal.</p></div></div>
-</div>
-</div></section><section class="section"><div class="container"><div class="jobs-tabs"><button class="job-tab active" data-job="miner">⛏️ Mineur</button><button class="job-tab" data-job="lumber">🪓 Bûcheron</button><button class="job-tab" data-job="farmer">🌾 Fermier</button><button class="job-tab" data-job="hunter">⚔️ Chasseur</button><button class="job-tab" data-job="fisher">🎣 Pêcheur</button><button class="job-tab" data-job="explorer">🧭 Explorateur</button><button class="job-tab" data-job="builder">🧱 Constructeur</button></div><div class="reward-toolbar"><div><strong>350 RÉCOMPENSES</strong></div><input id="reward-search" placeholder="Rechercher un item, un niveau..." type="search"/></div><section class="job-panel active" id="job-miner">
+<section class="section"><div class="container"><div class="jobs-tabs"><button class="job-tab active" data-job="miner">⛏️ Mineur</button><button class="job-tab" data-job="lumber">🪓 Bûcheron</button><button class="job-tab" data-job="farmer">🌾 Fermier</button><button class="job-tab" data-job="hunter">⚔️ Chasseur</button><button class="job-tab" data-job="fisher">🎣 Pêcheur</button><button class="job-tab" data-job="explorer">🧭 Explorateur</button><button class="job-tab" data-job="builder">🧱 Constructeur</button></div><div class="reward-toolbar"><div><strong>350 RÉCOMPENSES</strong></div><input id="reward-search" placeholder="Rechercher un item, un niveau..." type="search"/></div><section class="job-panel active" id="job-miner">
 <div class="job-summary"><div class="job-id"><div class="big">⛏️</div><h3>Mineur</h3><small>50 niveaux • progression individuelle</small></div><div class="job-how"><h4 class="job-how-title-v66">COMMENT LE MONTER ?</h4><p>Mine les blocs valides avec une pioche compatible. Les minerais rares sont les cibles de farming principales.</p><div class="tags"><span class="tag">PROGRESSION INDIVIDUELLE</span><span class="tag">50 NIVEAUX</span></div></div></div>
 <div class="ranges"><button class="range" data-range="1-10">1–10</button><button class="range" data-range="11-20">11–20</button><button class="range" data-range="21-30">21–30</button><button class="range" data-range="31-40">31–40</button><button class="range" data-range="41-50">41–50</button></div>
 <div><div class="row" data-search="mineur 1 tin pickaxe • efficiency i tin pickaxe"><div class="lvl"><div class="t">Niveau</div><div class="n">1</div></div><div class="items"><div class="item"><img alt="Tin Pickaxe" onerror="this.style.opacity=.35" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABj0lEQVR42u2avU7CUBiGW+MFGKKJxFswOOnm4CQgCaIxXUyMxqRpHLwAB3BwIrKx4gqTDBBHBwfjz4LXoIbEG2CrW+OHeNpKW4/p8049HDiQJ+/3d4JhIIRQimXG/QVbh5Yb5Xn9q06kv3km7Q4AQNoBzMYd871WW+xfP96K9dvHUHne0sLi+Eve+fNmRmwUS2WxtnbyJg4AAAD06gNeh++hPn984vy4t5rbFutTa1OsH+7vyAEAAEDCfUDUvftzdlnkkLK95z0/vXTFe0dzOAAA2pXBsDo4clxVe9uoX3jP+2eOsm0+r1XFenDzvSwSAgCgDOoV807tMnB7O2oabtC2GQcAAAB65AC/Ov+bkRYHAAAA+uaAaep8WE24QscBAABAwjngL+t8ZW1D3gcYVRwAAACoZUYd93HWeT+tFNZF/pl0B4gDAACA6XOAqtZ/vbdPYp7HAQCIoRX2+3enqtTpbnkcAAAAhB+H87typLVt2d4O/lnc4wAAAEDdCo+PlX4KMnbiAAAAACGEkG76BLI7bvy3rM9UAAAAAElFTkSuQmCC"/><div><div class="iname">Tin Pickaxe <span class="count">×1</span></div><div class="iid">more_ores_more_gems:tin_pickaxe</div><div class="ench">Efficiency 1</div></div></div></div><div class="desc"><span class="badge major">OUTIL MODDÉ</span><br/>Tin Pickaxe • Efficiency I</div></div>
