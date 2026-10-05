@@ -2492,6 +2492,33 @@ body.lightbox-open-v90{
   .hero-logo-real img{width:min(100%,560px)!important}
 }
 </style>
+
+<style id="hero-logo-real-position-fix-v113">
+/* V11.3 — real vertical centering: old container animation used to override transform */
+.hero-logo-real{
+  position:relative !important;
+  top:-68px !important;
+  transform:none !important;
+  animation:none !important;
+}
+/* The dedicated inner layer still keeps the floating motion. */
+.logo-float-layer-v76{
+  will-change:transform;
+}
+@media(max-width:960px){
+  .hero-logo-real{
+    top:-34px !important;
+    transform:none !important;
+    animation:none !important;
+  }
+}
+@media(max-width:720px){
+  .hero-logo-real{
+    top:-22px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <header class="site-nav">
