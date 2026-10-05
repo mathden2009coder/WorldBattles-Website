@@ -2519,6 +2519,41 @@ body.lightbox-open-v90{
 }
 </style>
 
+
+<style id="english-hero-title-fix-v114">
+/* Keep the new prefix white in French/default mode. */
+.hero-copy-real h1 .hero-title-prefix-v114{
+  color:#fff;
+}
+
+/* English hero: two clean lines, slightly smaller, no collision with logo. */
+html[lang="en"] .hero-copy-real h1{
+  font-size:clamp(2.35rem,4.05vw,4.1rem);
+  line-height:.94;
+  max-width:540px;
+}
+html[lang="en"] .hero-copy-real h1 .hero-title-prefix-v114,
+html[lang="en"] .hero-copy-real h1 > span:last-child{
+  display:block;
+  white-space:nowrap;
+}
+html[lang="en"] .hero-copy-real h1 > span:last-child{
+  color:var(--orange);
+}
+
+/* Slightly tighter paragraph width in English for a cleaner balance. */
+html[lang="en"] .hero-copy-real p{
+  max-width:500px;
+}
+
+@media (max-width:900px){
+  html[lang="en"] .hero-copy-real h1{
+    font-size:clamp(2.1rem,8vw,3.5rem);
+    max-width:none;
+  }
+}
+</style>
+
 </head>
 <body>
 <header class="site-nav">
@@ -2541,7 +2576,7 @@ body.lightbox-open-v90{
 <div class="container home-hero-grid">
 <div class="hero-copy-real">
 <div class="hero-overline">3 MODES</div>
-<h1>UNE SEULE <span>EXPÉRIENCE</span></h1>
+<h1><span class="hero-title-prefix-v114">UNE SEULE</span> <span>EXPÉRIENCE</span></h1>
 <p>Des combats intenses, un mode Zombies rapide et un univers Freelands axé farming, progression et métiers.</p>
 <div class="hero-actions-real">
 <a class="hero-play-real" href="pages/jouer.html">JOUER MAINTENANT <b>›</b></a>
