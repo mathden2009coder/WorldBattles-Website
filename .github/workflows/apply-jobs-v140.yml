@@ -1,0 +1,42 @@
+name: Apply jobs V14 enhancements
+on:
+  push:
+    branches: [main]
+    paths:
+      - jobs-v140.css
+      - jobs-v140.js
+      - .github/workflows/apply-jobs-v140.yml
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject jobs enhancements
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          css=Path("jobs-v140.css").read_text(encoding="utf-8")
+          js=Path("jobs-v140.js").read_text(encoding="utf-8")
+          css_block="\n<!-- JOBS-V140-CSS-START -->\n<style id=\"jobs-experience-v140\">\n"+css+"\n</style>\n<!-- JOBS-V140-CSS-END -->\n"
+          js_block="\n<!-- JOBS-V140-JS-START -->\n<script id=\"jobs-experience-v140-js\">\n"+js+"\n</script>\n<!-- JOBS-V140-JS-END -->\n"
+          if "<!-- JOBS-V140-CSS-START -->" in s:
+              s=re.sub(r"\n?<!-- JOBS-V140-CSS-START -->.*?<!-- JOBS-V140-CSS-END -->\n?",css_block,s,flags=re.S)
+          else:
+              s=s.replace("</head>",css_block+"</head>",1)
+          if "<!-- JOBS-V140-JS-START -->" in s:
+              s=re.sub(r"\n?<!-- JOBS-V140-JS-START -->.*?<!-- JOBS-V140-JS-END -->\n?",js_block,s,flags=re.S)
+          else:
+              s=s.replace("</body>",js_block+"</body>",1)
+          p.write_text(s,encoding="utf-8")
+      - name: Commit generated index
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Apply jobs V14 UX enhancements"
+          git push

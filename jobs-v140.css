@@ -1,0 +1,64 @@
+/* V14.0 — UX-only upgrades for Métiers. Reward data, XP, order and icons stay untouched. */
+.jobs-en-v140{display:none}
+html[lang="en"] .jobs-fr-v140{display:none}
+html[lang="en"] .jobs-en-v140{display:inline}
+
+.spa-page[data-route="jobs"] .reward-toolbar-v140{margin-bottom:8px}
+.spa-page[data-route="jobs"] .reward-toolbar-title-v140{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.spa-page[data-route="jobs"] #reward-results-count-v140{font-size:.68rem;color:#7f91a8;font-weight:800;letter-spacing:.04em}
+.spa-page[data-route="jobs"] #reward-search{transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}
+.spa-page[data-route="jobs"] #reward-search:focus{outline:none;border-color:#ff8a2b;box-shadow:0 0 0 3px rgba(255,138,43,.12);background:#111d2c}
+
+.spa-page[data-route="jobs"] .reward-filters-v140{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+.spa-page[data-route="jobs"] .reward-filter-v140{border:1px solid #293d56;background:#0e1826;color:#aebdce;border-radius:999px;padding:7px 11px;font:800 .68rem/1 inherit;cursor:pointer;transition:transform .15s ease,border-color .15s ease,background .15s ease,color .15s ease,box-shadow .15s ease}
+.spa-page[data-route="jobs"] .reward-filter-v140:hover{transform:translateY(-1px);border-color:#49617e;color:#fff}
+.spa-page[data-route="jobs"] .range.active-v140{border-color:#ff8a2b !important;color:#fff !important;background:#1a2230 !important;box-shadow:0 0 0 2px rgba(255,138,43,.08)}
+.spa-page[data-route="jobs"] .reward-filter-v140.active{background:linear-gradient(135deg,#ff7a1a,#e95b0d);border-color:#ff9c51;color:#fff;box-shadow:0 5px 18px rgba(255,112,24,.18)}
+
+/* Stronger visual language for the important 5-level milestones. */
+.spa-page[data-route="jobs"] .row.milestone-v140{border-color:#754a28 !important;background:linear-gradient(90deg,rgba(255,126,31,.095),#0c1520 32%,#0c1520) !important;box-shadow:inset 3px 0 0 rgba(255,139,50,.72)}
+.spa-page[data-route="jobs"] .row.milestone-v140:hover{border-color:#c57b39 !important;background:linear-gradient(90deg,rgba(255,126,31,.14),#0e1926 36%,#0e1926) !important}
+.spa-page[data-route="jobs"] .row.milestone-v140 .lvl .n{color:#ffc06d !important;text-shadow:0 0 14px rgba(255,155,53,.18)}
+.spa-page[data-route="jobs"] .row.milestone-v140 .lvl::after{content:"★ PALIER";display:block;margin-top:3px;color:#c98b4c;font-size:6px;font-weight:900;letter-spacing:.08em}
+html[lang="en"] .spa-page[data-route="jobs"] .row.milestone-v140 .lvl::after{content:"★ MILESTONE"}
+
+/* Level 50 is deliberately more prestigious while preserving the existing MAX badge. */
+.spa-page[data-route="jobs"] .row.level-50-v140{border-color:#d29a3a !important;background:linear-gradient(100deg,rgba(255,174,66,.17),rgba(29,20,12,.92) 28%,#0c1520 70%) !important;box-shadow:inset 4px 0 0 #ffb34f,0 0 22px rgba(255,171,64,.09)}
+.spa-page[data-route="jobs"] .row.level-50-v140 .lvl .n{color:#ffd787 !important;font-size:22px !important;text-shadow:0 0 16px rgba(255,187,82,.35)}
+.spa-page[data-route="jobs"] .row.level-50-v140 .lvl::after{content:"★ MAX";color:#ffd787}
+.spa-page[data-route="jobs"] .row.level-50-v140 .job-xp-badge-v132.max-v129{border:1px solid rgba(255,200,103,.38) !important;border-left:1px solid rgba(255,200,103,.55) !important;border-radius:9px !important;background:rgba(255,174,66,.08) !important;color:#ffd787 !important;text-shadow:0 0 12px rgba(255,190,80,.38);box-shadow:0 0 14px rgba(255,169,52,.08)}
+.spa-page[data-route="jobs"] .row.level-50-v140 .item img{filter:drop-shadow(0 0 5px rgba(255,190,85,.18))}
+
+/* Requested subtle item hover motion. */
+.spa-page[data-route="jobs"] .item{position:relative;transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease;will-change:transform}
+.spa-page[data-route="jobs"] .item img{transition:transform .16s ease,filter .16s ease}
+.spa-page[data-route="jobs"] .item:hover,.spa-page[data-route="jobs"] .item:focus-visible{transform:translateY(-2px) scale(1.018);border-color:#526c8b !important;background:#142235 !important;box-shadow:0 7px 18px rgba(0,0,0,.22);z-index:8;outline:none}
+.spa-page[data-route="jobs"] .item:hover img,.spa-page[data-route="jobs"] .item:focus-visible img{transform:scale(1.07)}
+
+/* Search spans every profession instead of only the selected tab. */
+.spa-page[data-route="jobs"].jobs-search-mode-v140 .job-panel{display:none !important}
+.spa-page[data-route="jobs"].jobs-search-mode-v140 .job-panel.jobs-search-visible-v140{display:block !important;margin-top:18px}
+.spa-page[data-route="jobs"].jobs-search-mode-v140 .job-panel .job-summary,
+.spa-page[data-route="jobs"].jobs-search-mode-v140 .job-panel .ranges{display:none !important}
+.spa-page[data-route="jobs"] .jobs-search-label-v140{display:none;margin:12px 0 7px;padding:8px 11px;border-left:3px solid #ff7b1b;background:#101a28;border-radius:7px;color:#f2f6fb;font:400 .82rem "Russo One",sans-serif;letter-spacing:.03em}
+.spa-page[data-route="jobs"].jobs-search-mode-v140 .job-panel.jobs-search-visible-v140 .jobs-search-label-v140{display:block}
+.spa-page[data-route="jobs"] .jobs-no-results-v140{display:none;padding:24px 18px;margin-top:14px;text-align:center;border:1px dashed #30445e;border-radius:12px;color:#8fa0b4;background:#0d1622}
+.spa-page[data-route="jobs"] .jobs-no-results-v140.show{display:block}
+
+/* Floating Minecraft-like information tooltip. */
+#job-item-tooltip-v140{position:fixed;left:0;top:0;z-index:99999;display:none;pointer-events:none;min-width:190px;max-width:min(320px,calc(100vw - 24px));padding:10px 12px;border:1px solid #5b477a;border-radius:7px;background:linear-gradient(145deg,rgba(12,8,22,.985),rgba(17,13,29,.985));box-shadow:0 10px 30px rgba(0,0,0,.48),inset 0 0 0 1px rgba(167,120,255,.08);color:#e9edf5;font-size:11px;line-height:1.38;text-align:left}
+#job-item-tooltip-v140.show{display:block}
+#job-item-tooltip-v140 .tt-name-v140{display:block;color:#fff;font-weight:900;font-size:12px;margin-bottom:4px}
+#job-item-tooltip-v140 .tt-meta-v140{display:flex;gap:6px;flex-wrap:wrap;color:#9eafc3;font-size:9px;margin-bottom:4px}
+#job-item-tooltip-v140 .tt-source-v140{color:#77d7ff}
+#job-item-tooltip-v140 .tt-ench-v140{color:#bd96ff;font-size:10px}
+
+@media(max-width:700px){
+  .spa-page[data-route="jobs"] .reward-toolbar-v140{align-items:stretch;flex-direction:column}
+  .spa-page[data-route="jobs"] .reward-toolbar-v140 input{width:100%}
+  .spa-page[data-route="jobs"] .reward-filter-v140{padding:7px 9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .spa-page[data-route="jobs"] .item,.spa-page[data-route="jobs"] .item img,.spa-page[data-route="jobs"] .reward-filter-v140{transition:none !important}
+  .spa-page[data-route="jobs"] .item:hover,.spa-page[data-route="jobs"] .item:focus-visible{transform:none}
+}
