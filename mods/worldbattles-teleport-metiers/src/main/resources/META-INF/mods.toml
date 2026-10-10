@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="worldbattlescommands"
+version="1.0.0"
+displayName="WorldBattles Teleportation et Metiers"
+description="Server-side commands for WorldBattles teleportation and job XP pause. Requires the accompanying patched Farlands Jobs V5.4 datapack to actually stop XP gains."
+displayTest="IGNORE_ALL_VERSION"
+
+[[dependencies.worldbattlescommands]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="SERVER"
+
+[[dependencies.worldbattlescommands]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="SERVER"
