@@ -27,3 +27,13 @@ Status: development plan. Zombies implementation is preserved and must remain fu
 - Verify saved template dimensions and load target chunks before placement.
 - One-time copies require explicit operator command and a world backup.
 - No JAR should be described as playable until code compiles and test limitations are disclosed.
+
+## Independent waiting-room structure (user screenshot 2026-10-10)
+- Structure ID: `minecraft:wbsalleattente`.
+- Structure Block coordinate indicated at top-right: approximately (-24,-59,-8) (verify this is block rather than player position before destructive placement).
+- Relative offset: (-13,0,-15).
+- Structure size: (13,13,15), entities OFF.
+- Derived origin **if** block at (-24,-59,-8): (-37,-59,-23), bounds X -37..-25, Y -59..-47, Z -23..-9.
+- Waiting spawn (-31,-59,-14) fits these bounds.
+- For copies 2 and 3, load both `minecraft:arena2` and `minecraft:wbsalleattente`, with matching X offsets and independent returns/restorations.
+- Make sure the structure was SAVED (button pressed), not just named/configured.
