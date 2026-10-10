@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 /** All GUI navigation and purchase actions are performed on the server. */
 public final class ShopGui {
     private ShopGui() {}
-    private static final int PAGE_SIZE = 36;
+    private static final int PAGE_SIZE = 24;
     private static final Map<UUID, Draft> DRAFTS = new HashMap<>();
 
     private static final class Draft {
@@ -77,7 +77,8 @@ public final class ShopGui {
             m.button(29, icon(Items.BOOK, "Mes annonces", "Annuler les annonces non vendues"), x -> myListings(x, 0));
             m.button(31, icon(Items.SUNFLOWER, "Ma banque", "Solde : " + balance + " $"), ShopGui::bank);
             m.button(33, icon(Items.PLAYER_HEAD, "Argent des joueurs", "Consulter tous les soldes"), x -> balances(x, 0));
-            m.button(40, icon(Items.ENDER_CHEST, "Boite de livraison", "Recuperer les achats et retours"), x -> mailbox(x, 0));
+            m.button(40, icon(Items.ENDER_CHEST, "Mes livraisons", "Recuperer les achats et retours"), x -> mailbox(x, 0));
+            m.button(44, icon(Items.GOLD_NUGGET, "SOLDE : " + balance + " $"), null);
             foot(m, p);
         });
     }

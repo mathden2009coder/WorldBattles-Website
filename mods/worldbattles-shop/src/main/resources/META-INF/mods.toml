@@ -4,7 +4,7 @@ license="All Rights Reserved"
 
 [[mods]]
 modId="worldbattlesshop"
-version="0.2.0"
+version="0.2.1"
 displayName="WorldBattles Shop"
 description='''
 WorldBattles economy with a custom dark/orange GUI, player market, buyback shop and virtual bank. Client and server installation required.

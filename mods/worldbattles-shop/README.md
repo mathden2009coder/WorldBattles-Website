@@ -1,4 +1,4 @@
-# WorldBattles Shop v0.2.0 — interface personnalisée
+# WorldBattles Shop v0.2.1 — interface personnalisée
 
 **Prototype Forge 1.20.1 / Java 17.** Interface originale inspirée du site WorldBattles : bleu nuit `#060912`, panneaux `#0c1320`, orange `#ff8419`, typographie claire, cartes interactives, barre de navigation permanente. Ce n'est pas un coffre Minecraft recoloré : l'écran est entièrement dessiné par le mod.
 
@@ -26,7 +26,7 @@ Workflow GitHub Actions sur la branche `feature/worldbattles-shop` (sans modifie
 gradle build --no-daemon --stacktrace
 ```
 
-Le fichier attendu est `build/libs/worldbattles-shop-0.2.0.jar`.
+Le fichier attendu est `build/libs/worldbattles-shop-0.2.1.jar`.
 
 ## Avant utilisation sur le serveur principal
 

@@ -17,6 +17,9 @@ assert 'owner.containerMenu == this' in menu
 assert 'ShopRegistry.SHOP_MENU.get()' in menu
 assert 'MenuScreens.register' in (source / 'client/ClientEvents.java').read_text()
 assert 'handleInventoryMouseClick' in screen
+assert 'i < 24' in screen
+assert 'drawDraft(' in screen
+assert 'drawNavigation(' in screen
 assert 'balances.put(listing.seller()' in data
 assert 'listings.remove(listingId)' in data
 assert 'setDirty();' in data
