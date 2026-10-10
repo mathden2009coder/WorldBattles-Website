@@ -57,7 +57,7 @@ public final class JobsNetwork {
             long last = LAST_REFRESH.getOrDefault(player.getUUID(), -100L);
             if (now >= last && now - last < 20L) return;
             LAST_REFRESH.put(player.getUUID(), now);
-            sendSnapshot(player);
+            CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), JobSnapshot.capture(player).asRefresh());
         });
         context.setPacketHandled(true);
     }

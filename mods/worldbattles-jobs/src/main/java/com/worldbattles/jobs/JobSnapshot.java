@@ -6,7 +6,7 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Scoreboard;
 
 /** Server-authoritative snapshot. No score is modified or reset by this mod. */
-public record JobSnapshot(boolean installed, int[] levels, int[] xp, int[] needed) {
+public record JobSnapshot(boolean installed, boolean openScreen, int[] levels, int[] xp, int[] needed) {
     public static JobSnapshot capture(ServerPlayer player) {
         Scoreboard board = player.getScoreboard();
         boolean found = board.getObjective("fj_sys") != null;
@@ -26,7 +26,7 @@ public record JobSnapshot(boolean installed, int[] levels, int[] xp, int[] neede
                 req[i] = Math.max(0, readScore(board, player, job.needObjective()));
             }
         }
-        return new JobSnapshot(found, lv, ex, req);
+        return new JobSnapshot(found, true, lv, ex, req);
     }
 
     private static int readScore(Scoreboard board, ServerPlayer player, String name) {
@@ -35,8 +35,13 @@ public record JobSnapshot(boolean installed, int[] levels, int[] xp, int[] neede
         return board.getOrCreatePlayerScore(player.getScoreboardName(), objective).getScore();
     }
 
+    public JobSnapshot asRefresh() {
+        return new JobSnapshot(installed, false, levels, xp, needed);
+    }
+
     public static void encode(JobSnapshot snapshot, FriendlyByteBuf buf) {
         buf.writeBoolean(snapshot.installed);
+        buf.writeBoolean(snapshot.openScreen);
         for (int i = 0; i < JobCatalog.COUNT; i++) {
             buf.writeVarInt(snapshot.levels[i]);
             buf.writeVarInt(snapshot.xp[i]);
@@ -46,6 +51,7 @@ public record JobSnapshot(boolean installed, int[] levels, int[] xp, int[] neede
 
     public static JobSnapshot decode(FriendlyByteBuf buf) {
         boolean installed = buf.readBoolean();
+        boolean openScreen = buf.readBoolean();
         int[] lv = new int[JobCatalog.COUNT];
         int[] ex = new int[JobCatalog.COUNT];
         int[] req = new int[JobCatalog.COUNT];
@@ -54,6 +60,6 @@ public record JobSnapshot(boolean installed, int[] levels, int[] xp, int[] neede
             ex[i] = buf.readVarInt();
             req[i] = buf.readVarInt();
         }
-        return new JobSnapshot(installed, lv, ex, req);
+        return new JobSnapshot(installed, openScreen, lv, ex, req);
     }
 }

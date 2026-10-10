@@ -11,7 +11,7 @@ public final class JobsClient {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.screen instanceof JobsScreen screen) {
             screen.update(snapshot); // No screen replacement: cursor and current tab stay put.
-        } else {
+        } else if (snapshot.openScreen()) {
             minecraft.setScreen(new JobsScreen(snapshot));
         }
     }

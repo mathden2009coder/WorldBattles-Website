@@ -130,7 +130,7 @@ public final class JobsScreen extends Screen {
     private void drawHome(GuiGraphics g, int top, int bottom, int mx, int my) {
         int gap = 6;
         int w = (pw - 26 - gap) / 2;
-        int h = Math.max(24, (bottom - top - 3 * gap) / 4);
+        int h = Math.max(10, (bottom - top - 3 * gap) / 4);
         for (int i = 0; i < JobCatalog.COUNT; i++) {
             int index = i;
             int x = px + 13 + (i % 2) * (w + gap);
@@ -147,6 +147,7 @@ public final class JobsScreen extends Screen {
                 g.drawString(font, fit(xp, w - 36), x + 28, y + 17, MUTED, false);
                 progress(g, x + 28, y + h - 7, w - 37, 3, i);
             }
+            if (over) hoveredTooltip = JobCatalog.JOBS[i].label() + " - " + xpLabel(i);
             hits.add(new Hit(x, y, w, h, () -> choose(index)));
         }
         int x = px + 13 + w + gap;
@@ -162,9 +163,10 @@ public final class JobsScreen extends Screen {
     }
 
     private void drawSidebar(GuiGraphics g, int top, int bottom, int mx, int my) {
-        int gap = 4;
+        int available = bottom - top;
+        int gap = available >= 160 ? 4 : available >= 95 ? 2 : 1;
         int w = Math.max(72, Math.min(112, pw / 4));
-        int h = Math.max(17, (bottom - top - gap * 6) / 7);
+        int h = Math.max(6, (available - gap * 6) / 7);
         for (int i = 0; i < JobCatalog.COUNT; i++) {
             int index = i;
             int x = px + 13;

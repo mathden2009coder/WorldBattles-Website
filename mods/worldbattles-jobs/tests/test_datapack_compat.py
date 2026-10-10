@@ -26,6 +26,9 @@ assert 'setScore' not in snapshot
 assert 'scoreboard players' not in '\n'.join([snapshot,network,main])
 assert 'JobsClient.accept(snapshot)' in network
 assert 'screen.update(snapshot)' in read('client/JobsClient.java')
+assert 'else if (snapshot.openScreen())' in read('client/JobsClient.java')
+assert '.asRefresh()' in network
+assert 'openScreen = buf.readBoolean()' in snapshot
 assert 'requestRefresh()' in screen
 assert 'this.width' not in screen or 'width * 84 / 100' in screen
 assert 'glfwSetCursorPos' not in screen

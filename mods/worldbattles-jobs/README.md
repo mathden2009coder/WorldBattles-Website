@@ -17,7 +17,7 @@ L'ancienne commande `/trigger metiers` du datapack reste disponible pour l'inter
 - **Tous les métiers** : 7 cartes, niveaux /50, XP / XP requis, barres de progression, total des niveaux et métiers au maximum.
 - **Détails** : fonctionnement du métier, niveau, XP, prochaine récompense.
 - **Récompenses** : catalogue exact des **50 récompenses pour chacun des 7 métiers** extrait de `data/farlands_jobs/functions/ui/next/*.mcfunction` de Farlands V5.4, défilement à la molette, niveaux atteints / prochains niveaux.
-- Mise à jour automatique des statistiques toutes les ~2 secondes, depuis le serveur, sans rouvrir la fenêtre ni recentrer la souris.
+- Mise à jour automatique des statistiques toutes les ~2 secondes, depuis le serveur, sans rouvrir la fenêtre ni recentrer la souris. Une réponse réseau tardive ne peut pas rouvrir la fenêtre après sa fermeture.
 - Interface compacte bleu nuit / orange dans la DA du WorldBattles Shop.
 
 ## Compatibilité / sécurité
