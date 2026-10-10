@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="worldbattlesshop"
+version="0.2.0"
+displayName="WorldBattles Shop"
+description='''
+WorldBattles economy with a custom dark/orange GUI, player market, buyback shop and virtual bank. Client and server installation required.
+'''
+displayTest="MATCH_VERSION"
+
+[[dependencies.worldbattlesshop]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.worldbattlesshop]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="BOTH"
