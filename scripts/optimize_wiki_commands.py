@@ -21,5 +21,17 @@ if match:
    s=s[:start]+s[start+tag.end():]
    break
  else:raise ValueError("Unclosed command card")
+# Preserve each image byte-for-byte, but store it outside the HTML.
+import base64,hashlib
+folder=Path("assets/embedded")
+folder.mkdir(parents=True,exist_ok=True)
+def move_image(m):
+ data=base64.b64decode(m.group(2),validate=True)
+ ext={"jpeg":"jpg","svg+xml":"svg"}.get(m.group(1).lower(),m.group(1).lower())
+ path=folder/(hashlib.sha256(data).hexdigest()[:24]+"."+ext)
+ if not path.exists():path.write_bytes(data)
+ elif path.read_bytes()!=data:raise ValueError("Image hash collision")
+ return path.as_posix()
+s=re.sub(r"data:image/(png|jpeg|jpg|webp|gif|svg\\+xml);base64,([A-Za-z0-9+/=]+)",move_image,s,flags=re.I)
 p.write_text(s,encoding="utf-8")
 print("Wiki updated",len(s))
