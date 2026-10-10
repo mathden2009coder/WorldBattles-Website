@@ -61,7 +61,7 @@ public class WorldBattlesArenas {
   final Set<UUID> dead=new HashSet<>(),mobs=new HashSet<>();
   final ServerBossEvent bar;
   Phase phase=Phase.AVAILABLE;
-  long deadline=0,restoreAt=0,lastSpawn=0;
+  long deadline=0,restoreAt=0,lastSpawn=0,startedAt=0;
   int wave=0,total=0,kills=0,spawned=0,cursor=0;
   boolean generated;
   Arena(int index){this.index=index;dx=index*300;generated=index==0;
@@ -102,6 +102,17 @@ public class WorldBattlesArenas {
    dead.remove(p.getUUID());lobby(p,this);
    if(players.isEmpty()||(phase==Phase.ACTIVE&&dead.containsAll(players)))finish(false);
   }
+  void ensureStartHeight(){
+   for(UUID id:players){ServerPlayer p=find(id);if(p==null||dead.contains(id))continue;
+    if(p.level().dimension()!=Level.OVERWORLD)continue;
+    // Correct external command blocks or spawn systems that move players back down.
+    // Only during the five-second countdown and initial seconds of gameplay.
+    if(p.getY() < -57.5){
+     LOG.warn("Arena {}: correcting low player spawn for {} from Y={} to Y=-56",index+1,p.getGameProfile().getName(),p.getY());
+     p.teleportTo(server.overworld(),-90.5+dx,-56,-3.5,30,4);
+    }
+   }
+  }
   void beginCountdown(){
    if(players.isEmpty()){finish(false);return;}
    phase=Phase.COUNTDOWN;deadline=tick+100;
@@ -116,7 +127,7 @@ public class WorldBattlesArenas {
   }
   void start(){
    if(players.isEmpty()){finish(false);return;}
-   phase=Phase.ACTIVE;total=100+50*(players.size()-1);kills=0;wave=0;dead.clear();
+   phase=Phase.ACTIVE;startedAt=tick;total=100+50*(players.size()-1);kills=0;wave=0;dead.clear();
    for(UUID id:players){ServerPlayer p=find(id);if(p!=null)bar.addPlayer(p);}
    nextWave();
   }
@@ -146,11 +157,13 @@ public class WorldBattlesArenas {
     }
    }
    if(phase==Phase.COUNTDOWN){
+    ensureStartHeight();
     if(tick%20==0){int seconds=(int)Math.max(0,(deadline-tick+19)/20);
      if(seconds>=1&&seconds<=5)announce("§e"+seconds,"§fDébut de la vague 1",22);}
     if(tick>=deadline)start();
    }
    if(phase!=Phase.ACTIVE)return;
+   if(tick-startedAt<100)ensureStartHeight();
    int alive=alive();
    int completed=0;int[] quotas=sizes();for(int i=0;i<wave-1;i++)completed+=quotas[i];
    if(kills-completed>=quota()&&alive==0){if(wave==3)finish(true);else nextWave();return;}
