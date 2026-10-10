@@ -1,0 +1,27 @@
+name: Update Wiki and optimize images
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/optimize_wiki_commands.py
+      - .github/workflows/optimize-wiki.yml
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python scripts/optimize_wiki_commands.py
+      - name: Commit optimized site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/embedded
+          if ! git diff --cached --quiet; then git commit -m "Move travel commands to Wiki and externalize embedded images"; git push; fi
