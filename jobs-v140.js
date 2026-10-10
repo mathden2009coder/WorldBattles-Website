@@ -159,44 +159,10 @@
     window.addEventListener('scroll',()=>tip.classList.remove('show'),{passive:true});
   }
 
-  // WorldBattles: commandes de déplacement affichées sur la page Métiers.
-  function setupWorldCommands(page){
-    if(page.querySelector('#wb-travel-commands')) return;
-    const panel=document.createElement('section');
-    panel.id='wb-travel-commands';
-    panel.style.cssText='margin:24px 0;padding:20px;border:1px solid rgba(150,170,190,.24);border-radius:16px;background:rgba(120,145,175,.07)';
-    panel.innerHTML='<h3 style="margin:0 0 8px">Commandes de téléportation</h3><p style="margin:0 0 14px;opacity:.75">À utiliser directement dans le chat Minecraft.</p><div style="display:flex;gap:10px;flex-wrap:wrap"></div>';
-    const commands=[['/spawn','Lobby — Overworld'],['/freelands','Freelands — SecondWorld'],['/minage','Minage — Monde minage']];
-    const wrap=panel.lastElementChild;
-    for(const [command,description] of commands){
-      const button=document.createElement('button');button.type='button';
-      button.style.cssText='display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px 16px;border-radius:12px;border:1px solid rgba(150,170,190,.28);background:rgba(120,145,175,.12);color:inherit;font:inherit';
-      const code=document.createElement('strong');code.textContent=command;
-      const info=document.createElement('small');info.textContent=description;info.style.opacity='.75';
-      button.append(code,info);button.title='Copier '+command;
-      button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(command);button.title='Copié !';setTimeout(()=>button.title='Copier '+command,1200)}catch(e){}});
-      wrap.appendChild(button);
-    }
-    const heading=page.querySelector('h1,h2');
-    if(heading)heading.insertAdjacentElement('afterend',panel);else page.prepend(panel);
-    // Retirer uniquement les instructions liées à /trigger metiers.
-    const walker=document.createTreeWalker(page,NodeFilter.SHOW_TEXT);
-    const targets=[];let node;
-    while((node=walker.nextNode())){
-      if(node.parentElement?.closest('script,style,#wb-travel-commands'))continue;
-      if(/\\/trigger\\s+m[eé]tiers\\b/i.test(node.nodeValue))targets.push(node);
-    }
-    for(const n of targets){
-      n.nodeValue=n.nodeValue.replace(/\\/trigger\\s+m[eé]tiers\\b/gi,'').replace(/\\s{2,}/g,' ');
-      const parent=n.parentElement;
-      if(parent && !parent.textContent.trim() && !parent.querySelector('img,svg,button,input'))parent.remove();
-    }
-  }
   function initJobsV140(){
     const page=document.querySelector('.spa-page[data-route="jobs"]');
     if(!page||page.dataset.jobsV140Ready==='1') return;
     page.dataset.jobsV140Ready='1';
-    setupWorldCommands(page);
     ensureToolbar(page);
     prepareRows(page);
     setSearchLabels(page);
