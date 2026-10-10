@@ -35,9 +35,12 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @Mod(WorldBattlesArenas.ID)
 public class WorldBattlesArenas {
  public static final String ID="worldbattlesarenas";
+ private static final Logger LOGGER=LoggerFactory.getLogger("WorldBattles Arenas");
  private static final String TAG="wb_arena_active", ZTAG="wb_arena_zombie", LOCK="wb_arena_recover";
  private static final BlockPos STRUCTURE_ORIGIN=new BlockPos(-142,-62,-12);
  private static final BlockPos STRUCTURE_SIZE=new BlockPos(65,10,101);
@@ -56,7 +59,7 @@ public class WorldBattlesArenas {
  private static Phase phase=Phase.AVAILABLE;
  private static MinecraftServer server;
  private static long tick=0,deadline=0,lastSpawn=0,restoreAt=0;
- private static boolean structureAvailable=false;
+
  private static int wave=0,total=0,kills=0,spawned=0,cursor=0;
  private static final ServerBossEvent progress=new ServerBossEvent(Component.literal("ZOMBIES  0 / 100"),BossEvent.BossBarColor.RED,BossEvent.BossBarOverlay.PROGRESS);
  public WorldBattlesArenas(){
@@ -149,10 +152,10 @@ public class WorldBattlesArenas {
  private static boolean validateStructure(){
   if(server==null)return false;
   Optional<StructureTemplate> maybe=server.overworld().getStructureManager().get(STRUCTURE_ID);
-  if(maybe.isEmpty()){server.getLogger().error("[WorldBattles Arenas] Missing structure {} - reset cancelled",STRUCTURE_ID);return false;}
+  if(maybe.isEmpty()){LOGGER.error("[WorldBattles Arenas] Missing structure {} - reset cancelled",STRUCTURE_ID);return false;}
   StructureTemplate template=maybe.get();
   if(!template.getSize().equals(STRUCTURE_SIZE)){
-   server.getLogger().error("[WorldBattles Arenas] Unexpected structure size {} (expected {}). Reset cancelled.",template.getSize(),STRUCTURE_SIZE);return false;
+   LOGGER.error("[WorldBattles Arenas] Unexpected structure size {} (expected {}). Reset cancelled.",template.getSize(),STRUCTURE_SIZE);return false;
   }
   return true;
  }
@@ -184,15 +187,16 @@ public class WorldBattlesArenas {
  }
  private static void completeReset(){
   if(phase!=Phase.CLEANING)return;
+  restoreAt=Long.MAX_VALUE;
   try{
    if(restoreStructure()){
     phase=Phase.AVAILABLE;
-    server.getLogger().info("[WorldBattles Arenas] Zombies structure restored.");
+    LOGGER.info("[WorldBattles Arenas] Zombies structure restored.");
    }else{
-    server.getLogger().error("[WorldBattles Arenas] Zombies reset failed. Arena remains locked; check minecraft:zombies.");
+    LOGGER.error("[WorldBattles Arenas] Zombies reset failed. Arena remains locked; check minecraft:zombies.");
    }
   }catch(Exception ex){
-   server.getLogger().error("[WorldBattles Arenas] Zombies reset failed. Arena locked.",ex);
+   LOGGER.error("[WorldBattles Arenas] Zombies reset failed. Arena locked.",ex);
   }
  }
  @SubscribeEvent public void commands(RegisterCommandsEvent e){
