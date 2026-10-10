@@ -61,7 +61,7 @@ public class WorldBattlesArenas {
   final Set<UUID> dead=new HashSet<>(),mobs=new HashSet<>();
   final ServerBossEvent bar;
   Phase phase=Phase.AVAILABLE;
-  long deadline=0,restoreAt=0,lastSpawn=0,startedAt=0;
+  long deadline=0,restoreAt=0,lastSpawn=0;
   int wave=0,total=0,kills=0,spawned=0,cursor=0;
   boolean generated;
   Arena(int index){this.index=index;dx=index*300;generated=index==0;
@@ -94,7 +94,7 @@ public class WorldBattlesArenas {
    if(players.size()>=10){message(p,"Cette arène est complète.");return;}
    if(phase==Phase.AVAILABLE){phase=Phase.WAITING;deadline=tick+2400;}
    clearOverworld(p);players.add(p.getUUID());p.addTag(TAG);p.setInvulnerable(true);p.setGameMode(GameType.ADVENTURE);
-   p.teleportTo(server.overworld(),-95.5+dx,-60,-7.5,0,0);
+   p.teleportTo(server.overworld(),-95.5+dx,-58,-7.5,0,0);
    announce("§6ZOMBIES "+(index+1),"§f"+players.size()+"/10 joueurs · Départ dans "+Math.max(0,(deadline-tick+19)/20)+" s",45);
   }
   void leave(ServerPlayer p){
@@ -102,23 +102,11 @@ public class WorldBattlesArenas {
    dead.remove(p.getUUID());lobby(p,this);
    if(players.isEmpty()||(phase==Phase.ACTIVE&&dead.containsAll(players)))finish(false);
   }
-  void ensureStartHeight(){
-   for(UUID id:players){ServerPlayer p=find(id);if(p==null||dead.contains(id))continue;
-    if(p.level().dimension()!=Level.OVERWORLD)continue;
-    // Correct external command blocks or spawn systems that move players back down.
-    // Only during the five-second countdown and initial seconds of gameplay.
-    if(p.getY() < -57.5){
-     LOG.warn("Arena {}: correcting low player spawn for {} from Y={} to Y=-56",index+1,p.getGameProfile().getName(),p.getY());
-     p.teleportTo(server.overworld(),-90.5+dx,-56,-3.5,30,4);
-    }
-   }
-  }
   void beginCountdown(){
    if(players.isEmpty()){finish(false);return;}
    phase=Phase.COUNTDOWN;deadline=tick+100;
    for(UUID id:players){ServerPlayer p=find(id);if(p!=null){
-    // Y=-56 corrects the two-block underground spawn reported after V0.3.1.
-    p.teleportTo(server.overworld(),-90.5+dx,-56,-3.5,30,4);p.setInvulnerable(false);
+    p.teleportTo(server.overworld(),-90.5+dx,-58,-3.5,30,4);p.setInvulnerable(false);
    }}
    announce("§6PRÉPAREZ-VOUS","§fRécupérez vos armes !",40);
   }
@@ -127,7 +115,7 @@ public class WorldBattlesArenas {
   }
   void start(){
    if(players.isEmpty()){finish(false);return;}
-   phase=Phase.ACTIVE;startedAt=tick;total=100+50*(players.size()-1);kills=0;wave=0;dead.clear();
+   phase=Phase.ACTIVE;total=100+50*(players.size()-1);kills=0;wave=0;dead.clear();
    for(UUID id:players){ServerPlayer p=find(id);if(p!=null)bar.addPlayer(p);}
    nextWave();
   }
@@ -151,26 +139,24 @@ public class WorldBattlesArenas {
     else if(tick%20==0){
      int seconds=(int)Math.max(0,(deadline-tick+19)/20);
      for(UUID id:players){ServerPlayer p=find(id);if(p==null)continue;
-      if(p.distanceToSqr(-95.5+dx,-60,-7.5)>9)p.teleportTo(server.overworld(),-95.5+dx,-60,-7.5,0,0);
+      if(p.distanceToSqr(-95.5+dx,-58,-7.5)>9)p.teleportTo(server.overworld(),-95.5+dx,-58,-7.5,0,0);
       p.displayClientMessage(Component.literal("§6Zombies "+(index+1)+" §f· Attente §e"+(seconds/60)+":"+String.format("%02d",seconds%60)+" §7· "+players.size()+"/10"),true);
      }
     }
    }
    if(phase==Phase.COUNTDOWN){
-    ensureStartHeight();
     if(tick%20==0){int seconds=(int)Math.max(0,(deadline-tick+19)/20);
      if(seconds>=1&&seconds<=5)announce("§e"+seconds,"§fDébut de la vague 1",22);}
     if(tick>=deadline)start();
    }
    if(phase!=Phase.ACTIVE)return;
-   if(tick-startedAt<100)ensureStartHeight();
    int alive=alive();
    int completed=0;int[] quotas=sizes();for(int i=0;i<wave-1;i++)completed+=quotas[i];
    if(kills-completed>=quota()&&alive==0){if(wave==3)finish(true);else nextWave();return;}
    if(alive<18&&spawned<quota()&&tick-lastSpawn>=12){spawn();lastSpawn=tick;}
    if(tick%20==0)for(UUID id:dead){ServerPlayer p=find(id);if(p!=null){
     p.setInvulnerable(true);
-    if(p.distanceToSqr(-95.5+dx,-60,-7.5)>16)p.teleportTo(server.overworld(),-95.5+dx,-60,-7.5,0,0);
+    if(p.distanceToSqr(-95.5+dx,-58,-7.5)>16)p.teleportTo(server.overworld(),-95.5+dx,-58,-7.5,0,0);
    }}
   }
   void finish(boolean victory){
@@ -304,7 +290,7 @@ public class WorldBattlesArenas {
    Arena a=findArena(p.getUUID());
    if(a!=null&&a.phase==Phase.ACTIVE&&!a.dead.contains(p.getUUID())){
     e.setCanceled(true);p.setHealth(1f);a.dead.add(p.getUUID());p.setInvulnerable(true);
-    p.teleportTo(server.overworld(),-95.5+a.dx,-60,-7.5,0,0);
+    p.teleportTo(server.overworld(),-95.5+a.dx,-58,-7.5,0,0);
     title(p,"§cÉLIMINÉ","§fAttends la fin de la partie",80);
     if(a.dead.containsAll(a.players))a.finish(false);
    }
