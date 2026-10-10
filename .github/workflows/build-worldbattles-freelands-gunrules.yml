@@ -1,0 +1,40 @@
+name: Build WorldBattles Freelands Gun Rules (Forge 1.20.1)
+
+on:
+  push:
+    branches:
+      - feature/freelands-gunrules
+    paths:
+      - 'mods/worldbattles-freelands-gunrules/**'
+      - '.github/workflows/build-worldbattles-freelands-gunrules.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: mods/worldbattles-freelands-gunrules
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Freelands/TaCZ safety contract
+        run: python3 tests/test_contract.py
+      - name: Compile server-side Forge mod
+        run: gradle build --no-daemon --stacktrace
+      - name: Upload server JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldbattles-freelands-gunrules-0.1.0-forge-1.20.1
+          path: mods/worldbattles-freelands-gunrules/build/libs/worldbattles-freelands-gunrules-0.1.0.jar
+          if-no-files-found: error

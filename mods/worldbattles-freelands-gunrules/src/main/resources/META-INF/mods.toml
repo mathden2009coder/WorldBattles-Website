@@ -1,0 +1,33 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="worldbattlesgunrules"
+version="0.1.0"
+displayName="WorldBattles Freelands Gun Rules"
+description='''
+Server-only protection: TaCZ gun crafting is blocked only in Freelands dimensions. Ammunition, attachments and crafting in other dimensions are unaffected.
+'''
+displayTest="IGNORE_ALL_VERSION"
+
+[[dependencies.worldbattlesgunrules]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="SERVER"
+
+[[dependencies.worldbattlesgunrules]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="SERVER"
+
+[[dependencies.worldbattlesgunrules]]
+modId="tacz"
+mandatory=true
+versionRange="[1.1.0,)"
+ordering="AFTER"
+side="SERVER"

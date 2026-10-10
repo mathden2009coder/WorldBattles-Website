@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.worldbattles.gunrules.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": ["GunSmithCraftMixin"],
+  "injectors": {"defaultRequire": 1}
+}
