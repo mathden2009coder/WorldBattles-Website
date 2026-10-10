@@ -1,0 +1,92 @@
+name: Export corrected index HTML
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/export-corrected-index.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pillow
+      - name: Restore last original index
+        run: |
+          mkdir -p corrected
+          git show 3ab488bae859e54044a1fb35248c7772da00926f:index.html > corrected/index.html
+      - name: Update only Wiki commands and optimize inline PNG without removing images
+        shell: python
+        run: |
+          from pathlib import Path
+          import re, base64, io
+          from PIL import Image, ImageChops
+          p = Path("corrected/index.html")
+          s = p.read_text(encoding="utf-8")
+          before = len(s.encode())
+          def card(cmd, description):
+              return ('<div class="wiki-command-card-v84"><div class="wiki-command-top-v84">'
+                  f'<code>{cmd}</code><button class="wiki-copy-v84" '
+                  f'data-copy-command="{cmd}" type="button">COPIER</button></div>'
+                  f'<p>{description}</p></div>')
+          # Remove exactly the legacy Wiki command card, preserve all others.
+          matches = list(re.finditer(r'<code>/trigger\s+m[eé]tiers</code>', s, re.I))
+          for m in reversed(matches):
+              start = s.rfind('<div class="wiki-command-card-v84">', 0, m.start())
+              if start < 0: raise ValueError("Legacy command card start not found")
+              depth = 0
+              end = None
+              for div in re.finditer(r'</?div\b[^>]*>', s[start:]):
+                  depth += -1 if div.group().startswith('</') else 1
+                  if depth == 0:
+                      end = start + div.end()
+                      break
+              if end is None: raise ValueError("Legacy command card end not found")
+              s = s[:start] + s[end:]
+          anchor = s.find('<code>/jobs</code>')
+          if anchor == -1: raise ValueError("Wiki command /jobs anchor missing")
+          start = s.rfind('<div class="wiki-command-card-v84">', 0, anchor)
+          if start == -1: raise ValueError("Wiki command card anchor missing")
+          new_cards = ''.join(card(cmd,desc) for cmd,desc in [
+              ('/spawn','Retour au lobby dans l’Overworld.'),
+              ('/freelands','Accès au monde Freelands.'),
+              ('/minage','Accès au monde Minage.')])
+          s = s[:start] + new_cards + s[start:]
+          # Optimize only base64 PNGs when the decoded pixel content is identical.
+          changed = [0]
+          def optimize(m):
+              raw = base64.b64decode(m.group(1))
+              try:
+                  original = Image.open(io.BytesIO(raw))
+                  if original.format != 'PNG' or getattr(original,'n_frames',1) != 1: return m.group()
+                  original.load()
+                  output = io.BytesIO()
+                  original.save(output,format='PNG',optimize=True,compress_level=9)
+                  reduced = output.getvalue()
+                  if len(reduced) >= len(raw): return m.group()
+                  check = Image.open(io.BytesIO(reduced)); check.load()
+                  if original.mode != check.mode or original.size != check.size: return m.group()
+                  if ImageChops.difference(original,check).getbbox() is not None: return m.group()
+                  changed[0] += 1
+                  return 'data:image/png;base64,' + base64.b64encode(reduced).decode('ascii')
+              except Exception:
+                  return m.group()
+          s = re.sub(r'data:image/png;base64,([A-Za-z0-9+/=]+)', optimize, s)
+          if not all('<code>'+cmd+'</code>' in s for cmd in ['/spawn','/freelands','/minage']):
+              raise ValueError('Missing requested commands')
+          if re.search(r'<code>/trigger\s+m[eé]tiers</code>',s,re.I):
+              raise ValueError('Old Wiki command was not removed')
+          p.write_text(s,encoding="utf-8")
+          print(f'Original: {before} bytes, corrected: {len(s.encode())} bytes. Optimized PNGs: {changed[0]}')
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WorldBattles-index-corrige
+          path: corrected/index.html
+          if-no-files-found: error
