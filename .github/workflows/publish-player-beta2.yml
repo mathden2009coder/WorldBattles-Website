@@ -1,0 +1,68 @@
+name: Publish WorldBattles Player BETA 2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-player-beta2.yml'
+      - 'scripts/rebuild_player_pack.py'
+      - 'scripts/patch_player_pack_site.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Download already compiled and tested mods
+        run: |
+          mkdir -p /tmp/wbmods/shop /tmp/wbmods/jobs /tmp/wbpack/base /tmp/wbpack/output
+          gh run download 38018914251 --name worldbattles-shop-forge-1.20.1 --dir /tmp/wbmods/shop
+          gh run download 38020167257 --name worldbattles-metiers-0.1.0-forge-1.20.1 --dir /tmp/wbmods/jobs
+          test -f /tmp/wbmods/shop/worldbattles-shop-0.2.2.jar
+          test -f /tmp/wbmods/jobs/worldbattles-jobs-0.1.0.jar
+      - name: Download existing player pack BETA 1
+        run: |
+          gh release download beta-1 --pattern 'WorldBattles_Modpack_Player_BETA1_Forge_1.20.1.zip' --dir /tmp/wbpack/base
+          test -s /tmp/wbpack/base/WorldBattles_Modpack_Player_BETA1_Forge_1.20.1.zip
+      - name: Create BETA 2, preserve and verify existing files
+        run: |
+          python3 scripts/rebuild_player_pack.py \
+            /tmp/wbpack/base/WorldBattles_Modpack_Player_BETA1_Forge_1.20.1.zip \
+            /tmp/wbmods/shop/worldbattles-shop-0.2.2.jar \
+            /tmp/wbmods/jobs/worldbattles-jobs-0.1.0.jar \
+            /tmp/wbpack/output/WorldBattles_Modpack_Player_BETA2_Forge_1.20.1.zip \
+            /tmp/wbpack/output/metadata.json
+      - name: Publish the new ZIP as a GitHub release
+        run: |
+          ASSET=/tmp/wbpack/output/WorldBattles_Modpack_Player_BETA2_Forge_1.20.1.zip
+          if gh release view beta-2 >/dev/null 2>&1; then
+            gh release upload beta-2 "$ASSET" --clobber
+          else
+            gh release create beta-2 "$ASSET" --target "$GITHUB_SHA" \
+              --title "WorldBattles Player BETA 2 - Shop et Métiers" \
+              --notes "Pack Forge 1.20.1 : BETA 1 conservée, avec WorldBattles Shop v0.2.2 et WorldBattles Métiers v0.1.0 ajoutés dans mods/. Commandes /wbshop et /jobs. Installez les mêmes mods côté serveur."
+          fi
+          gh release view beta-2 --json assets --jq '.assets[].name' | grep -Fx 'WorldBattles_Modpack_Player_BETA2_Forge_1.20.1.zip'
+      - name: Update the website's download and Wiki commands
+        run: |
+          python3 scripts/patch_player_pack_site.py index.html /tmp/wbpack/output/metadata.json
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "site: player BETA 2 with Shop and Metiers; document /jobs and /wbshop"
+            git push origin HEAD:main
+          fi
