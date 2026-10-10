@@ -215,7 +215,7 @@ public class WorldBattlesArenas {
   phase=Phase.COUNTDOWN;deadline=tick+100;
   for(UUID id:players){
    ServerPlayer p=server.getPlayerList().getPlayer(id);
-   if(p!=null){p.teleportTo(server.overworld(),-90.5,-60,-3.5,30,4);p.setInvulnerable(false);}
+   if(p!=null){p.teleportTo(server.overworld(),-90.5,-58,-3.5,30,4);p.setInvulnerable(false);}
   }
   everyone("§6PRÉPAREZ-VOUS","§fRécupérez vos armes !",40);
  }
