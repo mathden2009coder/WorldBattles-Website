@@ -1,5 +1,6 @@
 package com.worldbattles.arenas;
 import net.minecraft.commands.Commands;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
@@ -269,9 +270,24 @@ public final class WorldBattlesMode {
    .then(Commands.literal("wbadmin").requires(c->c.hasPermission(2))
     .then(Commands.literal("generate").executes(c->generate(c.getSource())))
     .then(Commands.literal("start").executes(c->{int n=0;for(Match m:MATCHES)if(m.phase==Phase.WAITING){m.prepRound();n++;}return n;}))
+    .then(Commands.literal("test25")
+     .then(Commands.argument("arena",IntegerArgumentType.integer(1,3))
+      .then(Commands.literal("nether").executes(c->simulate25(c.getSource(),IntegerArgumentType.getInteger(c,"arena"),Team.NETHER)))
+      .then(Commands.literal("overworld").executes(c->simulate25(c.getSource(),IntegerArgumentType.getInteger(c,"arena"),Team.OVERWORLD)))))
     .then(Commands.literal("status").executes(c->{for(Match m:MATCHES){String s="World Battles "+(m.index+1)+": "+m.status();
       c.getSource().sendSuccess(()->Component.literal(s),false);}return 1;}))
     .then(Commands.literal("reset").executes(c->{for(Match m:MATCHES)if(m.generated&&m.phase!=Phase.RESTORING)m.finish(null);return 1;}))));
+ }
+ private static int simulate25(CommandSourceStack source,int arena,Team winner){
+  Match match=MATCHES[arena-1];
+  if(match.phase!=Phase.ACTIVE){
+   source.sendFailure(Component.literal("World Battles : l'arène "+arena+" n'est pas en combat."));return 0;
+  }
+  if(winner==Team.NETHER)match.netherKills=25;else match.overworldKills=25;
+  match.updateBar();match.endRound(winner);
+  source.sendSuccess(()->Component.literal("TEST : 25 kills simulés pour "+winner+" dans l'arène "+arena+
+    ". Ce test valide le passage à la manche suivante, pas les éliminations PvP."),false);
+  return 1;
  }
  @SubscribeEvent public void tick(TickEvent.ServerTickEvent event){
   if(event.phase!=TickEvent.Phase.END)return;
