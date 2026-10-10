@@ -1,24 +1,29 @@
-# WorldBattles Freelands Gun Rules v0.1.0 — Forge 1.20.1
+# WorldBattles Freelands Gun Rules v0.2.0 — Forge 1.20.1
 
-**Server-only mod**, no player modpack update needed.
+**v0.2.0 fixes the original v0.1.0's lack of a guaranteed server-side fallback.** It adds a Forge `RightClickBlock` event guard, independent of Mixin injection, for all four standard TaCZ gunsmith workbenches.
 
-Blocks **TaCZ gun crafting** in these four dimensions only:
+Only these dimensions are protected:
 - `secondworld:overworld`
 - `secondworld:the_nether`
 - `minage:overworld`
 - `minage:the_nether`
 
-TaCZ guns remain usable, and can still be obtained from other sources. Ammo and attachments can still be crafted in Freelands. The vanilla Overworld, Nether, End, and WorldsBattle/Zombies modes are unaffected. The mod does not change TaCZ recipes, player inventories, existing guns, the economy, jobs, or any datapack.
+Vanilla Overworld, vanilla Nether, End, WorldBattles combat arenas and Zombies remain unaffected. The mod does not remove weapons, modify the economy, change datapacks or change inventories.
 
-## How it works
+## Default mode (reliable / strict)
 
-Injects at the start of TaCZ 1.20.1's **server-side** `GunSmithTableMenu#doCraft`, before materials are consumed or the gun is spawned. Only cancels if the player's current dimension is in the four-item whitelist AND the recipe's output item is `tacz:modern_kinetic_gun`. TaCZ ammo (`tacz:ammo`) and attachments (`tacz:attachment`) are not canceled. This covers gun recipes from TaCZ gun packs using the standard TaCZ gun item, on any TaCZ workbench.
+The default config `blockAllTaczWorkbenchesInFreelands=true` prevents opening TaCZ gunsmith tables in Freelands. Thus **guns cannot be crafted there** even if the TaCZ-specific Mixin fails to load. This mode also blocks crafting **TaCZ ammo and attachments** on those benches in Freelands. Existing guns and ammo remain usable. Other crafting tables are unaffected.
 
-## Install
+## Optional selective mode (requires working Mixin)
 
-1. Back up the server world.
-2. Stop the Forge 1.20.1 server on AxentHost.
-3. Place `worldbattles-freelands-gunrules-0.1.0.jar` in the **server's** `mods` directory (not required for players).
-4. Restart. Test: gun recipe blocked in Freelands, ammo/attachments allowed, gun recipe allowed outside Freelands.
+In `config/worldbattlesgunrules-common.toml`, set `blockAllTaczWorkbenchesInFreelands=false` and restart. The mod checks if the selective Mixin was really applied to TaCZ's menu; if it was, benches can open and only TaCZ gun output is blocked (ammo and attachments can still be crafted). If the Mixin is missing, the Forge event fallback continues to block the benches.
 
-**Important:** compile success and static checks are not an in-game integration test. Test on a staging copy of the server first; this mod uses a Mixin targeting TaCZ's 1.20.1 `GunSmithTableMenu#doCraft` method. Changes to TaCZ's implementation may require updating the Mixin.
+## Install on AxentHost
+
+1. Make a server backup and stop the Forge 1.20.1 server.
+2. **Delete** `worldbattles-freelands-gunrules-0.1.0.jar` from the server `mods/` folder.
+3. Put **only** `worldbattles-freelands-gunrules-0.2.0.jar` in server `mods/`. No player modpack change.
+4. Restart and run `/wbgunrules` as an OP while in Freelands to check the detected dimension and protection mode.
+5. Test: right-click a TaCZ gunsmith table in Freelands: it must be blocked with a message. Outside Freelands it must open normally.
+
+**Do not leave both mod versions installed.** Compile checks are not equivalent to a live integration test; validate with a staging copy before using on a production server.

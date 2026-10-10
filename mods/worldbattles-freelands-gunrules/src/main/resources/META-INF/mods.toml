@@ -4,10 +4,10 @@ license="All Rights Reserved"
 
 [[mods]]
 modId="worldbattlesgunrules"
-version="0.1.0"
+version="0.2.0"
 displayName="WorldBattles Freelands Gun Rules"
 description='''
-Server-only protection: TaCZ gun crafting is blocked only in Freelands dimensions. Ammunition, attachments and crafting in other dimensions are unaffected.
+Server-only TaCZ gunsmith workbench protection for Freelands. Default fail-safe blocks all TaCZ workbenches in Freelands; optional selective Mixin blocks only guns.
 '''
 displayTest="IGNORE_ALL_VERSION"
 

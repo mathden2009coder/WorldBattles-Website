@@ -35,6 +35,6 @@ jobs:
       - name: Upload server JAR
         uses: actions/upload-artifact@v4
         with:
-          name: worldbattles-freelands-gunrules-0.1.0-forge-1.20.1
-          path: mods/worldbattles-freelands-gunrules/build/libs/worldbattles-freelands-gunrules-0.1.0.jar
+          name: worldbattles-freelands-gunrules-0.2.0-forge-1.20.1
+          path: mods/worldbattles-freelands-gunrules/build/libs/worldbattles-freelands-gunrules-0.2.0.jar
           if-no-files-found: error
