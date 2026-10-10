@@ -28,19 +28,23 @@ public class WorldBattlesCompanion {
  @SubscribeEvent public void restrictCommands(CommandEvent event){
   CommandSourceStack source=event.getParseResults().getContext().getSource();
   if(!(source.getEntity() instanceof ServerPlayer player))return;
-  if(source.hasPermission(2))return;
   String entered=event.getParseResults().getReader().getString().trim();
   if(entered.startsWith("/"))entered=entered.substring(1);
   String label=entered.split("\\s+",2)[0].toLowerCase(java.util.Locale.ROOT);
   boolean inGame=player.getTags().contains(ARENA_TAG);
-  String namespace=player.level().dimension().location().getNamespace();
-  boolean inSurvivalWorld=namespace.equals("secondworld")||namespace.equals("minage");
-  if(inGame){
+  ResourceLocation dimension=player.level().dimension().location();
+  boolean inSurvivalWorld=(dimension.getNamespace().equals("secondworld")&&dimension.getPath().equals("overworld"))
+      ||(dimension.getNamespace().equals("minage")&&dimension.getPath().equals("overworld"));
+  boolean minageCommand=label.equals("minage")||label.endsWith(":minage");
+  boolean jobsCommand=label.equals("jobs")||label.endsWith(":jobs");
+  boolean shopCommand=label.equals("wbshop")||label.endsWith(":wbshop");
+  // This restriction applies to OP players too, when entered as players.
+  if(inGame&&!source.hasPermission(2)){
    event.setCanceled(true);
    source.sendFailure(Component.literal("Commandes indisponibles pendant une partie de mini-jeu."));
-  }else if((label.equals("jobs")||label.equals("wbshop"))&&!inSurvivalWorld){
+  }else if(!inSurvivalWorld&&(jobsCommand||shopCommand||minageCommand)){
    event.setCanceled(true);
-   source.sendFailure(Component.literal("Cette commande est réservée à Freelands et Minage."));
+   source.sendFailure(Component.literal("Commande réservée à Freelands et Minage."));
   }
  }
  @SubscribeEvent public void registerCommands(RegisterCommandsEvent event){
@@ -55,10 +59,10 @@ public class WorldBattlesCompanion {
  }
  private static int teleport(CommandSourceStack src,String id,double x,double y,double z) throws com.mojang.brigadier.exceptions.CommandSyntaxException{
  ServerPlayer p=src.getPlayerOrException();
-  if(!src.hasPermission(2)&&p.getTags().contains(ARENA_TAG)){
+  if(p.getTags().contains(ARENA_TAG)&&!src.hasPermission(2)){
    src.sendFailure(Component.literal("Impossible de se téléporter pendant un mini-jeu."));return 0;
   }
-  if(id.equals("minage:overworld")&&!src.hasPermission(2)){
+  if(id.equals("minage:overworld")){
    String namespace=p.level().dimension().location().getNamespace();
    if(!namespace.equals("secondworld")&&!namespace.equals("minage")){
     src.sendFailure(Component.literal("/minage est disponible uniquement depuis Freelands ou Minage."));return 0;
