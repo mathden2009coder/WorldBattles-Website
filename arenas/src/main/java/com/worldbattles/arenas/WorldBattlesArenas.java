@@ -219,6 +219,7 @@ public class WorldBattlesArenas {
   CHANNEL.registerMessage(1,Choose.class,(m,b)->b.writeInt(m.index()),b->new Choose(b.readInt()),
     (m,c)->{ServerPlayer p=c.get().getSender();c.get().enqueueWork(()->{if(p!=null)choose(p,m.index());});c.get().setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_SERVER));
   MinecraftForge.EVENT_BUS.register(this);
+  new WorldBattlesMode();
  }
  public static void select(int index){CHANNEL.sendToServer(new Choose(index));}
  private static ServerPlayer find(UUID id){return server==null?null:server.getPlayerList().getPlayer(id);}
