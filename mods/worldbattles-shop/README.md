@@ -1,4 +1,4 @@
-# WorldBattles Shop v0.2.1 — interface personnalisée
+# WorldBattles Shop v0.2.2 — interface personnalisée
 
 **Prototype Forge 1.20.1 / Java 17.** Interface originale inspirée du site WorldBattles : bleu nuit `#060912`, panneaux `#0c1320`, orange `#ff8419`, typographie claire, cartes interactives, barre de navigation permanente. Ce n'est pas un coffre Minecraft recoloré : l'écran est entièrement dessiné par le mod.
 
@@ -26,10 +26,17 @@ Workflow GitHub Actions sur la branche `feature/worldbattles-shop` (sans modifie
 gradle build --no-daemon --stacktrace
 ```
 
-Le fichier attendu est `build/libs/worldbattles-shop-0.2.1.jar`.
+Le fichier attendu est `build/libs/worldbattles-shop-0.2.2.jar`.
 
 ## Avant utilisation sur le serveur principal
 
 **La compilation et les tests en jeu ne sont pas encore confirmés.** Ne pas installer le prototype en production. Vérifier sur une copie du serveur, avec deux joueurs, les cas : inventaire plein, vente d'items moddés avec NBT, annonce achetée deux fois, vendeurs hors ligne, annulation, redémarrage, mort et changement de dimension. Retirer MiguelEconomy s'il est présent (conflit de commandes `/shop`, `/ah`).
 
 Le shop et les soldes sont sauvegardés dans `world/data/worldbattles_shop_v1.dat` (nom conservé pour compatibilité avec le prototype précédent). Une sauvegarde régulière du monde est nécessaire; les sauvegardes ne sont pas une base de données transactionnelle garantie contre une coupure brutale.
+
+## Affichage v0.2.2
+
+- Tableau plus compact (84 % de la fenêtre disponible, maximum 440 × 285 pixels GUI), même thème.
+- Catalogue de 24 articles par page, 4 lignes visibles et défilement à la molette.
+- Position du curseur restaurée lors des changements de page du shop.
+- Aucun changement aux sauvegardes, à l'économie ou aux dimensions.

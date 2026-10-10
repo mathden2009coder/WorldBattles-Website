@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,13 @@ public final class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     private final List<Hitbox> hits = new ArrayList<>();
     private ItemStack hovered = ItemStack.EMPTY;
     private int px, py, pw, ph;
+    private int catalogScrollRow = 0;
+    private boolean restoreCursorOnce = false;
+
+    // Keep cursor coordinates between menu changes within the shop.
+    private static double lastClickX, lastClickY;
+    private static int lastClickedMenu = -1;
+    private static long lastClickNanos = 0;
 
     private record Hitbox(int x, int y, int width, int height, int slot) {
         boolean contains(double mx, double my) {
@@ -52,9 +60,14 @@ public final class ShopScreen extends AbstractContainerScreen<ShopMenu> {
 
     @Override
     protected void init() {
-        this.imageWidth = Math.min(520, Math.max(180, this.width - 12));
-        this.imageHeight = Math.min(340, Math.max(175, this.height - 10));
+        // Smaller panel with margins, including on large GUI scales.
+        this.imageWidth = Math.min(440, Math.max(180, this.width * 84 / 100));
+        this.imageHeight = Math.min(285, Math.max(160, this.height * 84 / 100));
         super.init();
+        restoreCursorOnce = lastClickNanos != 0
+            && lastClickedMenu != menu.containerId
+            && System.nanoTime() - lastClickNanos < 5_000_000_000L;
+        if (restoreCursorOnce) lastClickNanos = 0;
         px = leftPos;
         py = topPos;
         pw = imageWidth;
@@ -74,6 +87,13 @@ public final class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         renderBackground(g);
+        // Restore after initialization, from the client render thread.
+        if (restoreCursorOnce && minecraft != null) {
+            restoreCursorOnce = false;
+            double sx = (double) minecraft.getWindow().getScreenWidth() / this.width;
+            double sy = (double) minecraft.getWindow().getScreenHeight() / this.height;
+            GLFW.glfwSetCursorPos(minecraft.getWindow().getWindow(), lastClickX * sx, lastClickY * sy);
+        }
         hits.clear();
         hovered = ItemStack.EMPTY;
 
@@ -151,11 +171,11 @@ public final class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     private String hint() {
         if (isHome()) return "Acheter, vendre et gerer ton argent au meme endroit";
         if (isDraft()) return "Ajuste le prix et la quantite, puis confirme";
-        if (page().startsWith("Marche")) return "Clique sur un objet pour voir le vendeur et le prix";
-        if (page().startsWith("Mes annonces")) return "Clique sur une annonce pour la retirer";
-        if (page().startsWith("Mes colis")) return "Clique sur un colis pour recuperer son contenu";
+        if (page().startsWith("Marche")) return "Clique pour voir le prix - molette pour defiler";
+        if (page().startsWith("Mes annonces")) return "Clique pour retirer une annonce - molette pour defiler";
+        if (page().startsWith("Mes colis")) return "Clique pour recuperer un colis - molette pour defiler";
         if (page().startsWith("Banque - joueurs")) return "Soldes classes du plus grand au plus petit";
-        if (page().equals("Vendre au serveur")) return "Clique sur une ressource pour choisir la quantite";
+        if (page().equals("Vendre au serveur")) return "Clique pour vendre - molette pour voir les ressources";
         if (isSellQuantity()) return "Le paiement est immediat";
         if (isDetails()) return "Verifie l'objet avant de confirmer";
         if (isBank()) return "Ton argent est conserve entre les connexions";
@@ -186,21 +206,31 @@ public final class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     }
 
     private void drawCatalog(GuiGraphics g, int top, int bottom, int mx, int my) {
+        // Same cards and 24-item server page; show 4 rows at once for legibility.
         int cols = 4;
-        int rows = 6;
+        int rows = 4;
         int gap = 4;
-        int w = (pw - 26 - (cols - 1) * gap) / cols;
-        int h = Math.max(14, (bottom - top - (rows - 1) * gap) / rows);
+        int w = (pw - 31 - (cols - 1) * gap) / cols;
+        int h = Math.max(16, (bottom - top - (rows - 1) * gap) / rows);
         boolean clickable = !page().startsWith("Banque - joueurs");
         boolean any = false;
-        for (int i = 0; i < 24; i++) {
+        int start = catalogScrollRow * cols;
+        for (int i = 0; i < rows * cols; i++) {
+            int slot = start + i;
             int x = px + 13 + (i % cols) * (w + gap);
             int y = top + (i / cols) * (h + gap);
-            if (!menu.getSlot(i).getItem().isEmpty()) {
-                tile(g, i, x, y, w, h, mx, my, true, ORANGE, clickable);
+            if (slot < 24 && !menu.getSlot(slot).getItem().isEmpty()) {
+                tile(g, slot, x, y, w, h, mx, my, true, ORANGE, clickable);
                 any = true;
             }
         }
+        // Subtle scroll indicator for the extra two rows.
+        int barX = px + pw - 12;
+        int barH = Math.max(1, bottom - top);
+        g.fill(barX, top, barX + 3, bottom, BORDER);
+        int thumbH = Math.max(12, barH * 4 / 6);
+        int thumbY = top + (barH - thumbH) * catalogScrollRow / 2;
+        g.fill(barX, thumbY, barX + 3, thumbY + thumbH, ORANGE);
         if (!any) {
             String message = page().startsWith("Mes colis") ? "Aucun colis en attente"
                 : page().startsWith("Mes annonces") ? "Tu n'as aucune annonce active"
@@ -403,11 +433,28 @@ public final class ShopScreen extends AbstractContainerScreen<ShopMenu> {
     }
 
     @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        if (isCatalog() && inside(mouseX, mouseY, px + 10, py + 60, pw - 20, ph - 100)) {
+            catalogScrollRow = Math.max(0, Math.min(2, catalogScrollRow + (delta > 0 ? -1 : 1)));
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, delta);
+    }
+
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button != 0 || minecraft == null || minecraft.gameMode == null || minecraft.player == null)
             return true;
         for (Hitbox hit : hits) {
             if (hit.contains(mouseX, mouseY)) {
+                if (hit.slot() != 50) {
+                    lastClickX = mouseX;
+                    lastClickY = mouseY;
+                    lastClickedMenu = menu.containerId;
+                    lastClickNanos = System.nanoTime();
+                } else {
+                    lastClickNanos = 0;
+                }
                 minecraft.gameMode.handleInventoryMouseClick(menu.containerId, hit.slot(), 0,
                     ClickType.PICKUP, minecraft.player);
                 return true;
