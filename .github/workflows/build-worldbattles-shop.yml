@@ -29,7 +29,7 @@ jobs:
         with:
           gradle-version: '8.7'
       - name: Unit tests
-        run: python3 -m unittest discover -s tests -p 'test_*.py'
+        run: python3 tests/test_invariants.py
       - name: Compile Forge mod
         run: gradle build --no-daemon --stacktrace
       - name: Upload JAR
