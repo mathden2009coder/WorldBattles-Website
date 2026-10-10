@@ -1,0 +1,60 @@
+name: Update WorldBattles server address
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-server-address.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-address:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Replace Aternos address and remove obsolete port
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("index.html")
+          html = path.read_text(encoding="utf-8")
+          old = "WorldBattles.aternos.me"
+          new = "worldbattles.axenthost.me"
+          old_port = "60991"
+          old_port_card = ('<div class="server-address-card-v88 server-port-v88">'
+                           '<span>PORT</span><code>60991</code>'
+                           '<button class="server-copy-v88" data-copy-server="60991" '
+                           'type="button">COPIER</button></div>')
+          if old in html:
+              assert old_port_card in html, "The old port card was changed"
+              assert "grid-template-columns:2fr .75fr;" in html, "Grid CSS changed"
+              html = html.replace(old_port_card, "")
+              html = html.replace(old + ":" + old_port, new)
+              html = html.replace(old, new)
+              html = html.replace("grid-template-columns:2fr .75fr;", "grid-template-columns:1fr;", 1)
+          assert old not in html, "Old address still present"
+          assert old_port not in html, "Old Aternos port still present"
+          assert html.count(new) >= 4, "New address missing from site"
+          assert 'data-copy-server="' + new + '"' in html, "Copy button not updated"
+          assert "WorldBattles_Modpack_Player_BETA2_Forge_1.20.1.zip" in html, "BETA 2 link missing"
+          assert "<code>/jobs</code>" in html and "<code>/wbshop</code>" in html, "Wiki commands missing"
+          path.write_text(html, encoding="utf-8")
+          print("Server address updated and verified:", new)
+          PY
+      - name: Commit website update
+        run: |
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "site: update server IP to worldbattles.axenthost.me"
+            git push origin HEAD:main
+          fi
