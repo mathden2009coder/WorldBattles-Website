@@ -2,6 +2,10 @@ package com.worldbattles.arenas;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.Mirror;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
@@ -35,6 +39,9 @@ import java.util.*;
 public class WorldBattlesArenas {
  public static final String ID="worldbattlesarenas";
  private static final String TAG="wb_arena_active", ZTAG="wb_arena_zombie", LOCK="wb_arena_recover";
+ private static final BlockPos STRUCTURE_ORIGIN=new BlockPos(-142,-62,-12);
+ private static final BlockPos STRUCTURE_SIZE=new BlockPos(65,10,101);
+ private static final ResourceLocation STRUCTURE_ID=new ResourceLocation("minecraft","zombies");
  private static final int[][] SPAWNS={
  {-96,-60,24},{-92,-60,46},{-113,-60,55},{-101,-60,49},{-112,-60,78},
  {-96,-60,67},{-92,-60,82},{-125,-60,77},{-121,-60,62},{-132,-60,42},
@@ -48,7 +55,8 @@ public class WorldBattlesArenas {
  private enum Phase {AVAILABLE,WAITING,COUNTDOWN,ACTIVE,CLEANING}
  private static Phase phase=Phase.AVAILABLE;
  private static MinecraftServer server;
- private static long tick=0,deadline=0,lastSpawn=0;
+ private static long tick=0,deadline=0,lastSpawn=0,restoreAt=0;
+ private static boolean structureAvailable=false;
  private static int wave=0,total=0,kills=0,spawned=0,cursor=0;
  private static final ServerBossEvent progress=new ServerBossEvent(Component.literal("ZOMBIES  0 / 100"),BossEvent.BossBarColor.RED,BossEvent.BossBarOverlay.PROGRESS);
  public WorldBattlesArenas(){
@@ -83,11 +91,16 @@ public class WorldBattlesArenas {
   case CLEANING->"NETTOYAGE EN COURS";
  };}
  private static void show(ServerPlayer p){CHANNEL.send(PacketDistributor.PLAYER.with(()->p),new Show(status()));}
+ private static void clearLobbyEquipment(ServerPlayer p){
+  if(p.level().dimension()!=Level.OVERWORLD)return;
+  p.getInventory().clearContent();
+  p.containerMenu.broadcastChanges();
+ }
  private static void lobby(ServerPlayer p){
   ServerLevel level=server.overworld();
-  progress.removePlayer(p);p.setInvulnerable(false);p.removeTag(TAG);p.removeTag(LOCK);
+  progress.removePlayer(p);p.setInvulnerable(false);clearLobbyEquipment(p);p.removeTag(TAG);p.removeTag(LOCK);
   p.teleportTo(level,23.5,-58,18.5,0,0);p.setGameMode(GameType.ADVENTURE);
-  // Safety: never clear inventory or restore structures in this early test build.
+  // Never touch inventories loaded from other dimensions.
  }
  private static void join(ServerPlayer p){
   if(p.level().dimension()!=Level.OVERWORLD){say(p,"Rejoins le lobby d'abord.");return;}
@@ -95,6 +108,7 @@ public class WorldBattlesArenas {
   if(players.contains(p.getUUID())){say(p,"Tu es deja inscrit.");return;}
   if(players.size()>=10){say(p,"Partie pleine.");return;}
   if(phase==Phase.AVAILABLE){phase=Phase.WAITING;deadline=tick+2400;}
+  clearLobbyEquipment(p);
   players.add(p.getUUID());p.addTag(TAG);p.setGameMode(GameType.ADVENTURE);
   p.teleportTo(server.overworld(),-95.5,-60,-7.5,0,0);
   title(p,"§6SALLE D'ATTENTE","§fDépart dans "+Math.max(0,(deadline-tick+19)/20)+" secondes",60);
@@ -132,15 +146,54 @@ public class WorldBattlesArenas {
   }
   // Do not count an unsuccessful spawn. Administrator can reset the test.
  }
+ private static boolean validateStructure(){
+  if(server==null)return false;
+  Optional<StructureTemplate> maybe=server.overworld().getStructureManager().get(STRUCTURE_ID);
+  if(maybe.isEmpty()){server.getLogger().error("[WorldBattles Arenas] Missing structure {} - reset cancelled",STRUCTURE_ID);return false;}
+  StructureTemplate template=maybe.get();
+  if(!template.getSize().equals(STRUCTURE_SIZE)){
+   server.getLogger().error("[WorldBattles Arenas] Unexpected structure size {} (expected {}). Reset cancelled.",template.getSize(),STRUCTURE_SIZE);return false;
+  }
+  return true;
+ }
+ private static boolean restoreStructure(){
+  if(!validateStructure())return false;
+  ServerLevel world=server.overworld();
+  StructureTemplate template=world.getStructureManager().get(STRUCTURE_ID).orElseThrow();
+  StructurePlaceSettings settings=new StructurePlaceSettings().setMirror(Mirror.NONE).setRotation(Rotation.NONE).setIgnoreEntities(true);
+  return template.placeInWorld(world,STRUCTURE_ORIGIN,STRUCTURE_ORIGIN,settings,world.random,2);
+ }
  private static void finish(boolean victory){
+  if(phase==Phase.CLEANING)return;
   phase=Phase.CLEANING;
   if(server!=null){
    ServerLevel level=server.overworld();
-   for(UUID id:new ArrayList<>(players)){ServerPlayer p=server.getPlayerList().getPlayer(id);if(p!=null){lobby(p);say(p,victory?"VICTOIRE !":"Partie terminee.");}}
+   for(UUID id:new ArrayList<>(players)){
+    ServerPlayer p=server.getPlayerList().getPlayer(id);
+    if(p!=null){
+     lobby(p);
+     title(p,victory?"§aVICTOIRE !":"§cDÉFAITE",victory?"§fVous avez éliminé "+kills+" zombies !":"§fRetour au lobby",100);
+    }
+   }
    for(UUID id:mobs){Entity mob=level.getEntity(id);if(mob!=null&&mob.getTags().contains(ZTAG))mob.discard();}
    progress.removeAllPlayers();
   }
-  players.clear();dead.clear();mobs.clear();wave=0;kills=0;total=0;phase=Phase.AVAILABLE;
+  players.clear();dead.clear();mobs.clear();wave=0;kills=0;total=0;
+  // Keep the arena locked while chunks are checked and the saved structure is restored.
+  restoreAt=tick+20;
+ }
+ private static void completeReset(){
+  if(phase!=Phase.CLEANING)return;
+  try{
+   if(restoreStructure()){
+    phase=Phase.AVAILABLE;
+    server.getLogger().info("[WorldBattles Arenas] Zombies structure restored.");
+   }else{
+    server.getLogger().error("[WorldBattles Arenas] Zombies reset failed. Arena remains locked; check minecraft:zombies.");
+   }
+  }catch(Exception ex){
+   server.getLogger().error("[WorldBattles Arenas] Zombies reset failed. Arena locked.",ex);
+  }
  }
  @SubscribeEvent public void commands(RegisterCommandsEvent e){
   e.getDispatcher().register(Commands.literal("wbarenas")
@@ -164,6 +217,7 @@ public class WorldBattlesArenas {
  }
  @SubscribeEvent public void onTick(TickEvent.ServerTickEvent e){
   if(e.phase!=TickEvent.Phase.END)return;server=e.getServer();tick++;
+  if(phase==Phase.CLEANING){if(tick>=restoreAt)completeReset();return;}
   if(phase==Phase.WAITING){
    if(tick>=deadline)beginCountdown();
    else if(tick%20==0){
