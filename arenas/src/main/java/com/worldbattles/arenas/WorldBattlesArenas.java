@@ -62,7 +62,7 @@ public class WorldBattlesArenas {
   final ServerBossEvent bar;
   Phase phase=Phase.AVAILABLE;
   long deadline=0,restoreAt=0,lastSpawn=0;
-  int wave=0,total=0,kills=0,spawned=0,cursor=0;
+  int wave=0,total=0,kills=0,spawned=0,cursor=0,failedSpawns=0;
   boolean generated;
   Arena(int index){this.index=index;dx=index*300;generated=index==0;
    bar=new ServerBossEvent(Component.literal("ZOMBIES "+(index+1)),BossEvent.BossBarColor.RED,BossEvent.BossBarOverlay.PROGRESS);
@@ -115,21 +115,53 @@ public class WorldBattlesArenas {
   }
   void start(){
    if(players.isEmpty()){finish(false);return;}
-   phase=Phase.ACTIVE;total=100+50*(players.size()-1);kills=0;wave=0;dead.clear();
+   phase=Phase.ACTIVE;total=100+50*(players.size()-1);kills=0;wave=0;failedSpawns=0;dead.clear();
    for(UUID id:players){ServerPlayer p=find(id);if(p!=null)bar.addPlayer(p);}
    nextWave();
+  }
+  private boolean clearFeet(ServerLevel level,BlockPos pos){
+   return level.getBlockState(pos).getCollisionShape(level,pos).isEmpty()
+     &&level.getBlockState(pos.above()).getCollisionShape(level,pos.above()).isEmpty();
+  }
+  private BlockPos findSpawn(ServerLevel level,BlockPos pos){
+   // The original arena's tested spawn positions remain unchanged.
+   if(index==0)return clearFeet(level,pos)?pos:null;
+   // Cloned structures can contain blocks at the original feet height.
+   // Search vertically near each translated spawn; do not spawn inside walls.
+   for(int dy=0;dy<=4;dy++){
+    BlockPos test=pos.above(dy);
+    if(clearFeet(level,test)&&!level.getBlockState(test.below()).getCollisionShape(level,test.below()).isEmpty())return test;
+   }
+   for(int radius=1;radius<=2;radius++){
+    for(int x=-radius;x<=radius;x++)for(int z=-radius;z<=radius;z++){
+     if(Math.abs(x)!=radius&&Math.abs(z)!=radius)continue;
+     for(int dy=0;dy<=4;dy++){
+      BlockPos test=pos.offset(x,dy,z);
+      if(clearFeet(level,test)&&!level.getBlockState(test.below()).getCollisionShape(level,test.below()).isEmpty())return test;
+     }
+    }
+   }
+   return null;
   }
   void spawn(){
    ServerLevel level=server.overworld();
    for(int tries=0;tries<SPAWNS.length;tries++){
     int[] pt=SPAWNS[cursor++%SPAWNS.length];
-    BlockPos pos=new BlockPos(pt[0]+dx,pt[1],pt[2]);
-    if(!level.getBlockState(pos).getCollisionShape(level,pos).isEmpty()
-       ||!level.getBlockState(pos.above()).getCollisionShape(level,pos.above()).isEmpty())continue;
-    Zombie z=EntityType.ZOMBIE.create(level);if(z==null)return;
-    z.moveTo(pt[0]+dx+.5,pt[1],pt[2]+.5,level.random.nextFloat()*360,0);
+    BlockPos expected=new BlockPos(pt[0]+dx,pt[1],pt[2]);
+    // Ensure that remote arena chunks are actually loaded before checking blocks.
+    level.getChunkAt(expected);
+    BlockPos pos=findSpawn(level,expected);
+    if(pos==null)continue;
+    Zombie z=EntityType.ZOMBIE.create(level);if(z==null)break;
+    z.moveTo(pos.getX()+.5,pos.getY(),pos.getZ()+.5,level.random.nextFloat()*360,0);
     z.addTag(ZTAG);z.addTag("wb_arena_"+index);z.setPersistenceRequired();
-    if(level.addFreshEntity(z)){mobs.add(z.getUUID());spawned++;}return;
+    if(level.addFreshEntity(z)){mobs.add(z.getUUID());spawned++;failedSpawns=0;return;}
+   }
+   failedSpawns++;
+   if(failedSpawns==1||failedSpawns%100==0){
+    LOG.warn("Zombies arena {} cannot spawn ({} failures): {} positions evaluated, x-offset {}, wave {}, spawned {}/{}. Verify copied structure Y alignment and solid floors.",
+     index+1,failedSpawns,SPAWNS.length,dx,wave,spawned,quota());
+    if(failedSpawns==100)announce("§cAPPARITION BLOQUÉE","§fSignaler le problème à un administrateur",70);
    }
   }
   void tick(){
@@ -270,6 +302,16 @@ public class WorldBattlesArenas {
    .then(Commands.literal("leave").executes(c->{if(c.getSource().getEntity() instanceof ServerPlayer p){Arena a=findArena(p.getUUID());if(a!=null)a.leave(p);return 1;}return 0;}))
    .then(Commands.literal("status").executes(c->{c.getSource().sendSuccess(()->Component.literal(
     "Zombies: "+ARENAS[0].status()+" | "+ARENAS[1].status()+" | "+ARENAS[2].status()),false);return 1;}))
+   .then(Commands.literal("diagnostic").requires(x->x.hasPermission(2)).executes(c->{
+    for(Arena a:ARENAS){int viable=0;ServerLevel level=c.getSource().getServer().overworld();
+     for(int[] pt:SPAWNS){BlockPos at=new BlockPos(pt[0]+a.dx,pt[1],pt[2]);level.getChunkAt(at);
+      if(a.findSpawn(level,at)!=null)viable++;}
+     int good=viable;
+     c.getSource().sendSuccess(()->Component.literal("Zombies "+(a.index+1)+
+      ": emplacements valides "+good+"/17, phase "+a.phase+", zombies invoqués "+a.spawned+
+      ", kills "+a.kills+", échecs "+a.failedSpawns),false);
+    }return 1;
+   }))
    .then(Commands.literal("admin").requires(s->s.hasPermission(2))
     .then(Commands.literal("generate").executes(c->{int count=generate();
      c.getSource().sendSuccess(()->Component.literal("Arènes Zombies générées : "+count+" (déjà existantes ignorées)."),true);return count;}))
