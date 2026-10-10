@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="worldbattlesjobs"
+version="0.1.0"
+displayName="WorldBattles Metiers"
+description='''
+Read-only interface for Farlands Metiers V5.4 scoreboard stats and 350 rewards. Preserves the datapack's XP, levels, and rewards. Requires client and server installation.
+'''
+displayTest="MATCH_VERSION"
+
+[[dependencies.worldbattlesjobs]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.worldbattlesjobs]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="BOTH"

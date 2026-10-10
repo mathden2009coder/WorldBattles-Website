@@ -1,0 +1,40 @@
+name: Build WorldBattles Metiers (Forge 1.20.1)
+
+on:
+  push:
+    branches:
+      - feature/worldbattles-jobs
+    paths:
+      - 'mods/worldbattles-jobs/**'
+      - '.github/workflows/build-worldbattles-jobs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: mods/worldbattles-jobs
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Datapack compatibility checks
+        run: python3 tests/test_datapack_compat.py
+      - name: Compile Forge mod
+        run: gradle build --no-daemon --stacktrace
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldbattles-metiers-0.1.0-forge-1.20.1
+          path: mods/worldbattles-jobs/build/libs/worldbattles-jobs-0.1.0.jar
+          if-no-files-found: error
