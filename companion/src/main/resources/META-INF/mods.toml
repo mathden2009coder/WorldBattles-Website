@@ -1,0 +1,14 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+[[mods]]
+modId="worldbattlescompanion"
+version="1.1.0"
+displayName="WorldBattles Companion"
+description="Teleportation and job pause controls for WorldBattles"
+[[dependencies.worldbattlescompanion]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
