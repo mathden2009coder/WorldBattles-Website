@@ -94,7 +94,7 @@ public final class WorldBattlesMode {
    Team team=count(Team.NETHER)<=count(Team.OVERWORLD)?Team.NETHER:Team.OVERWORLD;
    clear(p);teams.put(p.getUUID(),team);p.addTag(ACTIVE);
    p.setGameMode(GameType.ADVENTURE);p.setInvulnerable(true);
-   p.teleportTo(server.overworld(),-30.5+dx,-59,-13.5,0,0);
+   p.teleportTo(server.overworld(),-30.5+dx,-57,-13.5,0,0);
    titles("§6WORLD BATTLES","§f"+teams.size()+"/10 joueurs · "+Math.max(0,(deadline-ticks+19)/20)+" secondes",50);
   }
   void leave(ServerPlayer p){
@@ -110,8 +110,8 @@ public final class WorldBattlesMode {
    titles("§eMANCHE "+round,"§fDébut dans 5 secondes",40);
   }
   void teleportTeam(ServerPlayer p,Team team){
-   if(team==Team.NETHER)p.teleportTo(server.overworld(),27.5+dx,-51,-56.5,0,0);
-   else p.teleportTo(server.overworld(),-91.5+dx,-51,-56.5,0,0);
+   if(team==Team.NETHER)p.teleportTo(server.overworld(),27.5+dx,-49,-56.5,0,0);
+   else p.teleportTo(server.overworld(),-91.5+dx,-49,-56.5,0,0);
   }
   void endRound(Team winner){
    if(winner==Team.NETHER)netherWins++;else overworldWins++;
@@ -123,7 +123,7 @@ public final class WorldBattlesMode {
   void beginRestore(){
    phase=Phase.RESTORING;restoreAt=ticks+60;
    for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p!=null){
-    p.setInvulnerable(true);p.teleportTo(server.overworld(),-30.5+dx,-59,-13.5,0,0);
+    p.setInvulnerable(true);p.teleportTo(server.overworld(),-30.5+dx,-57,-13.5,0,0);
    }}
    titles("§6PREPARATION","§fRestauration avant la prochaine manche",75);
   }
@@ -149,7 +149,7 @@ public final class WorldBattlesMode {
     else if(ticks%20==0){int remaining=(int)Math.max(0,(deadline-ticks+19)/20);
      for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p!=null){
       p.setInvulnerable(true);
-      if(p.distanceToSqr(-30.5+dx,-59,-13.5)>9)p.teleportTo(server.overworld(),-30.5+dx,-59,-13.5,0,0);
+      if(p.distanceToSqr(-30.5+dx,-57,-13.5)>9)p.teleportTo(server.overworld(),-30.5+dx,-57,-13.5,0,0);
       p.displayClientMessage(Component.literal("§6World Battles §f· "+remaining/60+":"+String.format("%02d",remaining%60)+" · "+teams.size()+"/10"),true);
      }}
     }
