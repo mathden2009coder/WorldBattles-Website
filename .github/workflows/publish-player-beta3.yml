@@ -1,0 +1,31 @@
+name: Publish WorldBattles Player Pack BETA3
+on:
+  push:
+    branches: [player-modpack-beta3-dev]
+    paths: ['.github/workflows/publish-player-beta3.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download validated BETA3 pack
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release
+          gh run download 38103993983 --repo "${{ github.repository }}" --name "WorldBattles-Modpack-Player-BETA3-Forge-1.20.1" --dir release
+          test -s release/WorldBattles_Modpack_Player_BETA3_Forge_1.20.1.zip
+          cat release/verification.json
+          sha256sum release/WorldBattles_Modpack_Player_BETA3_Forge_1.20.1.zip
+      - name: Publish BETA 3 GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create beta-3 release/WorldBattles_Modpack_Player_BETA3_Forge_1.20.1.zip \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "WorldBattles Player BETA 3 — Zombies, World Battles et Sand Wars" \
+            --notes "Modpack joueur Minecraft Forge 1.20.1. Reprend integralement la BETA 2 avec WorldBattles Arenas 0.3.2 (Zombies, World Battles, Sand Wars). Conserve Shop 0.2.2, Metiers 0.1.0, autres mods, textures, shader et configurations. 73 mods au total. Installer aussi Arenas 0.3.2 sur le serveur."
