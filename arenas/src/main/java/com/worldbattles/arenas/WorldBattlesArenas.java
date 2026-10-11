@@ -220,6 +220,7 @@ public class WorldBattlesArenas {
     (m,c)->{ServerPlayer p=c.get().getSender();c.get().enqueueWork(()->{if(p!=null)choose(p,m.index());});c.get().setPacketHandled(true);},Optional.of(NetworkDirection.PLAY_TO_SERVER));
   MinecraftForge.EVENT_BUS.register(this);
   new WorldBattlesMode();
+  new SandWarsMode();
  }
  public static void select(int index){CHANNEL.sendToServer(new Choose(index));}
  private static ServerPlayer find(UUID id){return server==null?null:server.getPlayerList().getPlayer(id);}
