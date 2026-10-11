@@ -62,11 +62,11 @@ public final class SandWarsMode {
   final Set<UUID> eliminated=new HashSet<>();
   final ServerBossEvent bar;
   Phase phase=Phase.READY;
-  boolean generated;
+  boolean generated, aligned;
   long deadline,restoreAt;
   int round=0,orangeWins=0,normalWins=0;
   Match(int index){
-   this.index=index;dz=index*300;verticalOffset=index==0?0:-2;generated=index==0;
+   this.index=index;dz=index*300;verticalOffset=index==0?0:-2;generated=index==0;aligned=index==0;
    bar=new ServerBossEvent(Component.literal("SAND WARS"),BossEvent.BossBarColor.YELLOW,BossEvent.BossBarOverlay.PROGRESS);
   }
   String status(){
@@ -282,6 +282,7 @@ public final class SandWarsMode {
   int moved=0;
   for(int i=1;i<3;i++){
    Match m=MATCHES[i];
+   if(m.aligned)continue;
    if(!restoreMap(m)||!copyRoom(m)){
     source.sendFailure(Component.literal("Echec du réalignement Sand Wars "+(i+1)+". Vérifie les logs et la sauvegarde."));
     return moved;
@@ -289,20 +290,28 @@ public final class SandWarsMode {
    // Remove only the two topmost layers of the former +2-block-high copy.
    clearOldUpperLayers(MAP_ORIGIN.offset(0,0,m.dz),MAP_SIZE);
    clearOldUpperLayers(ROOM_ORIGIN.offset(0,0,m.dz),ROOM_SIZE);
+   m.aligned=true;saveFlags();
    moved++;
   }
-  source.sendSuccess(()->Component.literal("Sand Wars: "+moved+" copies réalignées 2 blocs plus bas."),true);
+  final int result=moved;
+  source.sendSuccess(()->Component.literal("Sand Wars: "+result+" copies réalignées 2 blocs plus bas."),true);
   return moved;
  }
  private static Path flagFile(){return server.getWorldPath(LevelResource.ROOT).resolve("sandwars-mode-generated.properties");}
  private static void loadFlags(){
   try{Properties properties=new Properties();if(Files.exists(flagFile()))try(var input=Files.newInputStream(flagFile())){properties.load(input);}
-   for(int i=1;i<3;i++)MATCHES[i].generated=Boolean.parseBoolean(properties.getProperty("arena"+(i+1),"false"));
+   for(int i=1;i<3;i++){
+    MATCHES[i].generated=Boolean.parseBoolean(properties.getProperty("arena"+(i+1),"false"));
+    MATCHES[i].aligned=Boolean.parseBoolean(properties.getProperty("aligned"+(i+1),"false"));
+   }
   }catch(Exception e){LOG.error("Cannot read Sand Wars generation flags",e);}
  }
  private static void saveFlags(){
   try{Properties properties=new Properties();
-   for(int i=1;i<3;i++)properties.setProperty("arena"+(i+1),Boolean.toString(MATCHES[i].generated));
+   for(int i=1;i<3;i++){
+    properties.setProperty("arena"+(i+1),Boolean.toString(MATCHES[i].generated));
+    properties.setProperty("aligned"+(i+1),Boolean.toString(MATCHES[i].aligned));
+   }
    try(var output=Files.newOutputStream(flagFile())){properties.store(output,"Sand Wars generated copies");}
   }catch(Exception e){LOG.error("Cannot write Sand Wars generation flags",e);}
  }
@@ -314,7 +323,7 @@ public final class SandWarsMode {
   for(int i=1;i<3;i++){Match match=MATCHES[i];
    if(match.generated||match.phase!=Phase.READY)continue;
    if(!restoreMap(match)||!copyRoom(match))break;
-   match.generated=true;created++;saveFlags();
+   match.generated=true;match.aligned=true;created++;saveFlags();
   }
   int result=created;
   source.sendSuccess(()->Component.literal("Sand Wars : "+result+" copie(s) générées sur l'axe Z."),true);
