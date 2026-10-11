@@ -1,6 +1,6 @@
 plugins { id 'net.minecraftforge.gradle' version '[6.0,6.2)' }
 group='com.worldbattles'
-version='0.2.1-worldbattles-test'
+version='0.3.0-sandwars-test'
 base { archivesName='worldbattles-arenas' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 minecraft { mappings channel: 'official', version: '1.20.1'; runs { server { workingDirectory project.file('run') }; client { workingDirectory project.file('run') } } }
