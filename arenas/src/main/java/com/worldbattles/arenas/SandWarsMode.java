@@ -92,7 +92,7 @@ public final class SandWarsMode {
    bar.setName(Component.literal("SAND WARS · Orange "+orangeWins+"/3 | Sable "+normalWins+"/3 | Manche "+round));
    bar.setProgress(Math.max(orangeWins,normalWins)/3f);
   }
-  void waitRoom(ServerPlayer p){p.setInvulnerable(true);p.teleportTo(server.overworld(),118.5,-59+verticalOffset,43.5+dz,0,0);}
+  void waitRoom(ServerPlayer p){p.setInvulnerable(true);p.teleportTo(server.overworld(),118.5,-59+verticalOffset+(index==0?0:1),43.5+dz,0,0);}
   void teamSpawn(ServerPlayer p,Team team){
    if(team==Team.ORANGE)p.teleportTo(server.overworld(),102.5,-56+verticalOffset,0.5+dz,0,0);
    else p.teleportTo(server.overworld(),37.5,-53+verticalOffset,87.5+dz,180,0);
@@ -176,7 +176,7 @@ public final class SandWarsMode {
     else if(ticks%20==0){int seconds=(int)Math.max(0,(deadline-ticks+19)/20);
      for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p==null)continue;
       p.setInvulnerable(true);
-      if(p.distanceToSqr(118.5,-59+verticalOffset,43.5+dz)>9)waitRoom(p);
+      if(p.distanceToSqr(118.5,-59+verticalOffset+(index==0?0:1),43.5+dz)>9)waitRoom(p);
       p.displayClientMessage(Component.literal("§6Sand Wars §f· "+seconds/60+":"+String.format("%02d",seconds%60)+" · "+teams.size()+"/10"),true);
      }
     }
@@ -195,7 +195,7 @@ public final class SandWarsMode {
    if(phase==Phase.ACTIVE&&ticks%20==0)for(UUID id:eliminated){
     ServerPlayer p=find(id);if(p==null)continue;
     p.setInvulnerable(true);
-    if(p.distanceToSqr(118.5,-59,43.5+dz)>16)waitRoom(p);
+    if(p.distanceToSqr(118.5,-59+verticalOffset+(index==0?0:1),43.5+dz)>16)waitRoom(p);
    }
   }
  }
