@@ -1,0 +1,34 @@
+name: Publish BETA3 site and game rules
+on:
+  push:
+    branches: [player-modpack-beta3-dev]
+    paths:
+      - '.github/workflows/publish-site-beta3.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: player-modpack-beta3-dev
+      - name: Preserve patch script
+        run: cp scripts/patch_site_beta3_and_modes.py /tmp/worldbattles_site_patch.py
+      - name: Read latest published site
+        run: git fetch origin main && git checkout main
+      - name: Update existing site
+        run: |
+          python /tmp/worldbattles_site_patch.py index.html
+          git diff --check
+          git diff --stat
+      - name: Commit changes to published branch
+        run: |
+          git config user.name "WorldBattles Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Update game rules, scaling Zombies objectives and modpack BETA3 link"
+            git push origin HEAD:main
+          fi
