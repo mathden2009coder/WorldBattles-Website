@@ -17,6 +17,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -56,7 +57,7 @@ public final class SandWarsMode {
  private static MinecraftServer server;
  private static long ticks;
  private static final class Match {
-  final int index,dz;
+  final int index,dz,verticalOffset;
   final Map<UUID,Team> teams=new LinkedHashMap<>();
   final Set<UUID> eliminated=new HashSet<>();
   final ServerBossEvent bar;
@@ -65,7 +66,7 @@ public final class SandWarsMode {
   long deadline,restoreAt;
   int round=0,orangeWins=0,normalWins=0;
   Match(int index){
-   this.index=index;dz=index*300;generated=index==0;
+   this.index=index;dz=index*300;verticalOffset=index==0?0:-2;generated=index==0;
    bar=new ServerBossEvent(Component.literal("SAND WARS"),BossEvent.BossBarColor.YELLOW,BossEvent.BossBarOverlay.PROGRESS);
   }
   String status(){
@@ -91,10 +92,10 @@ public final class SandWarsMode {
    bar.setName(Component.literal("SAND WARS · Orange "+orangeWins+"/3 | Sable "+normalWins+"/3 | Manche "+round));
    bar.setProgress(Math.max(orangeWins,normalWins)/3f);
   }
-  void waitRoom(ServerPlayer p){p.setInvulnerable(true);p.teleportTo(server.overworld(),118.5,-59,43.5+dz,0,0);}
+  void waitRoom(ServerPlayer p){p.setInvulnerable(true);p.teleportTo(server.overworld(),118.5,-59+verticalOffset,43.5+dz,0,0);}
   void teamSpawn(ServerPlayer p,Team team){
-   if(team==Team.ORANGE)p.teleportTo(server.overworld(),102.5,-56,0.5+dz,0,0);
-   else p.teleportTo(server.overworld(),37.5,-53,87.5+dz,180,0);
+   if(team==Team.ORANGE)p.teleportTo(server.overworld(),102.5,-56+verticalOffset,0.5+dz,0,0);
+   else p.teleportTo(server.overworld(),37.5,-53+verticalOffset,87.5+dz,180,0);
   }
   void join(ServerPlayer p){
    if(!generated||phase==Phase.RESTORING||phase==Phase.LOCKED){info(p,"Arène indisponible.");return;}
@@ -175,7 +176,7 @@ public final class SandWarsMode {
     else if(ticks%20==0){int seconds=(int)Math.max(0,(deadline-ticks+19)/20);
      for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p==null)continue;
       p.setInvulnerable(true);
-      if(p.distanceToSqr(118.5,-59,43.5+dz)>9)waitRoom(p);
+      if(p.distanceToSqr(118.5,-59+verticalOffset,43.5+dz)>9)waitRoom(p);
       p.displayClientMessage(Component.literal("§6Sand Wars §f· "+seconds/60+":"+String.format("%02d",seconds%60)+" · "+teams.size()+"/10"),true);
      }
     }
@@ -230,13 +231,68 @@ public final class SandWarsMode {
  }
  private static boolean restoreMap(Match match){
   Optional<StructureTemplate> map=template(MAP_ID,MAP_SIZE);if(map.isEmpty())return false;
-  try{return paste(map.get(),MAP_ORIGIN.offset(0,0,match.dz));}
+  try{return paste(map.get(),MAP_ORIGIN.offset(0,match.verticalOffset,match.dz));}
   catch(Exception e){LOG.error("Sand Wars arena {} restoration failed",match.index+1,e);return false;}
  }
  private static boolean copyRoom(Match match){
   Optional<StructureTemplate> room=template(ROOM_ID,ROOM_SIZE);if(room.isEmpty())return false;
-  try{return paste(room.get(),ROOM_ORIGIN.offset(0,0,match.dz));}
+  try{return paste(room.get(),ROOM_ORIGIN.offset(0,match.verticalOffset,match.dz));}
   catch(Exception e){LOG.error("Sand Wars waiting room {} creation failed",match.index+1,e);return false;}
+ }
+ // One-time correction for already-generated copies only. An operator must run this
+ // after a full world backup. It does not affect the original arena.
+ private static boolean noPlayersInOldCopy(Match match){
+  ServerLevel world=server.overworld();
+  for(ServerPlayer p:server.getPlayerList().getPlayers()){
+   if(p.level()!=world)continue;
+   BlockPos point=p.blockPosition();
+   boolean nearMap=point.getX()>=MAP_ORIGIN.getX()-3&&point.getX()<MAP_ORIGIN.getX()+MAP_SIZE.getX()+3
+     &&point.getZ()>=MAP_ORIGIN.getZ()+match.dz-3&&point.getZ()<MAP_ORIGIN.getZ()+match.dz+MAP_SIZE.getZ()+3;
+   boolean nearRoom=point.getX()>=ROOM_ORIGIN.getX()-3&&point.getX()<ROOM_ORIGIN.getX()+ROOM_SIZE.getX()+3
+     &&point.getZ()>=ROOM_ORIGIN.getZ()+match.dz-3&&point.getZ()<ROOM_ORIGIN.getZ()+match.dz+ROOM_SIZE.getZ()+3;
+   if(nearMap||nearRoom)return false;
+  }
+  return true;
+ }
+ private static void clearOldUpperLayers(BlockPos originalOrigin,BlockPos dimensions){
+  ServerLevel world=server.overworld();
+  // Only the two obsolete top layers above the newly-lowered copy.
+  // This does not clear any blocks within the freshly positioned structure.
+  BlockPos.MutableBlockPos pos=new BlockPos.MutableBlockPos();
+  for(int y=originalOrigin.getY()+dimensions.getY()-2;y<originalOrigin.getY()+dimensions.getY();y++){
+   for(int x=originalOrigin.getX();x<originalOrigin.getX()+dimensions.getX();x++){
+    for(int z=originalOrigin.getZ();z<originalOrigin.getZ()+dimensions.getZ();z++){
+     pos.set(x,y,z);
+     if(!world.getBlockState(pos).isAir())world.setBlock(pos,Blocks.AIR.defaultBlockState(),2);
+    }
+   }
+  }
+ }
+ private static int realign(CommandSourceStack source){
+  if(template(MAP_ID,MAP_SIZE).isEmpty()||template(ROOM_ID,ROOM_SIZE).isEmpty()){
+   source.sendFailure(Component.literal("Sand Wars: structures manquantes ou de mauvaise taille."));return 0;
+  }
+  for(int i=1;i<3;i++){
+   Match m=MATCHES[i];
+   if(!m.generated||m.phase!=Phase.READY||!noPlayersInOldCopy(m)){
+    source.sendFailure(Component.literal("Sand Wars "+(i+1)+": copie non générée, partie active ou joueur dans la zone. Rien n'a été déplacé."));
+    return 0;
+   }
+  }
+  int moved=0;
+  for(int i=1;i<3;i++){
+   Match m=MATCHES[i];
+   if(!restoreMap(m)||!copyRoom(m)){
+    source.sendFailure(Component.literal("Echec du réalignement Sand Wars "+(i+1)+". Vérifie les logs et la sauvegarde."));
+    return moved;
+   }
+   // Remove only the two topmost layers of the former +2-block-high copy.
+   clearOldUpperLayers(MAP_ORIGIN.offset(0,0,m.dz),MAP_SIZE);
+   clearOldUpperLayers(ROOM_ORIGIN.offset(0,0,m.dz),ROOM_SIZE);
+   moved++;
+  }
+  source.sendSuccess(()->Component.literal("Sand Wars: "+moved+" copies réalignées 2 blocs plus bas."),true);
+  return moved;
  }
  private static Path flagFile(){return server.getWorldPath(LevelResource.ROOT).resolve("sandwars-mode-generated.properties");}
  private static void loadFlags(){
@@ -290,6 +346,7 @@ public final class SandWarsMode {
       .executes(c->{open(EntityArgument.getPlayer(c,"joueur"));return 1;}))))
    .then(Commands.literal("swadmin").requires(s->s.hasPermission(2))
     .then(Commands.literal("generate").executes(c->generate(c.getSource())))
+    .then(Commands.literal("realign").executes(c->realign(c.getSource())))
     .then(Commands.literal("start").executes(c->{int n=0;for(Match m:MATCHES)if(m.phase==Phase.WAITING){m.beginRound();n++;}return n;}))
     .then(Commands.literal("status").executes(c->{for(Match m:MATCHES){
      String state="Sand Wars "+(m.index+1)+": "+m.status()+" manches "+m.orangeWins+"-"+m.normalWins;
