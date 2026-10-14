@@ -185,7 +185,7 @@ public final class WorldBattlesMode {
     else if(ticks%20==0){int remaining=(int)Math.max(0,(deadline-ticks+19)/20);
      for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p!=null){
       p.setInvulnerable(true);
-      if(p.distanceToSqr(-30.5+dx,-57,-13.5)>9)p.teleportTo(server.overworld(),-30.5+dx,-57,-13.5,0,0);
+      // Salle d'attente délimitée par des blocs-barrières : pas de téléportation de rappel.
       p.displayClientMessage(Component.literal("§6World Battles §f· "+remaining/60+":"+String.format("%02d",remaining%60)+" · "+teams.size()+"/10"),true);
      }}
     }
