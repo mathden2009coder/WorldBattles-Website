@@ -103,7 +103,7 @@ public final class SandWarsMode {
    if(p.level().dimension()!=Level.OVERWORLD){info(p,"Rejoins le lobby.");return;}
    if(teams.size()>=10){info(p,"Arène complète.");return;}
    if(p.getTags().contains(ACTIVE)){info(p,"Tu participes déjà à un mini-jeu.");return;}
-   if(phase==Phase.READY){phase=Phase.WAITING;deadline=ticks+2400;}
+   if(phase==Phase.READY){phase=Phase.WAITING;deadline=ticks+1200;}
    Team team=count(Team.ORANGE)<=count(Team.NORMAL)?Team.ORANGE:Team.NORMAL;
    clear(p);teams.put(p.getUUID(),team);p.addTag(ACTIVE);p.setGameMode(GameType.ADVENTURE);
    waitRoom(p);
@@ -112,10 +112,23 @@ public final class SandWarsMode {
   void leave(ServerPlayer p){
    if(teams.remove(p.getUUID())==null)return;
    eliminated.remove(p.getUUID());lobby(p,this);
-   if(teams.isEmpty()){if(phase==Phase.WAITING)phase=Phase.READY;else finish(null);}
+   if(teams.isEmpty()){if(phase==Phase.WAITING)phase=Phase.READY;else finish(null);
+   else if(phase==Phase.COUNTDOWN||phase==Phase.ACTIVE)if(!canStart())cancelIfAlone();}
    else if(phase==Phase.ACTIVE)checkRoundEnd();
   }
+  boolean canStart(){return teams.size()>=2&&count(Team.ORANGE)>0&&count(Team.NORMAL)>0;}
+  void cancelIfAlone(){
+   if(canStart())return;
+   for(UUID id:new ArrayList<>(teams.keySet())){ServerPlayer p=find(id);if(p!=null){
+    info(p,"Partie annulée : il faut au moins 2 joueurs, un dans chaque équipe.");
+    title(p,"§ePARTIE ANNULÉE","§fPas assez de joueurs · Retour au spawn",60);
+   }}
+   // finish() returns each participant to the lobby, clears the match state and restores the arena.
+   if(phase==Phase.RESTORING)phase=Phase.COUNTDOWN;
+   finish(null);
+  }
   void beginRound(){
+   if(!canStart()){cancelIfAlone();return;}
    if(teams.isEmpty()){finish(null);return;}
    round++;phase=Phase.COUNTDOWN;deadline=ticks+100;eliminated.clear();updateBar();
    for(var entry:teams.entrySet()){ServerPlayer p=find(entry.getKey());if(p==null)continue;
@@ -169,10 +182,11 @@ public final class SandWarsMode {
     restoreAt=Long.MAX_VALUE;
     if(!restoreMap(this)){phase=Phase.LOCKED;LOG.error("Sand Wars arena {} locked after restore failure",index+1);return;}
     if(teams.isEmpty()){phase=Phase.READY;return;}
+    if(!canStart()){cancelIfAlone();return;}
     beginRound();
    }
    if(phase==Phase.WAITING){
-    if(ticks>=deadline)beginRound();
+    if(ticks>=deadline){if(canStart())beginRound();else cancelIfAlone();}
     else if(ticks%20==0){int seconds=(int)Math.max(0,(deadline-ticks+19)/20);
      for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p==null)continue;
       p.setInvulnerable(true);
@@ -182,6 +196,7 @@ public final class SandWarsMode {
     }
    }
    if(phase==Phase.COUNTDOWN){
+    if(!canStart()){cancelIfAlone();return;}
     if(ticks%20==0){int sec=(int)((deadline-ticks+19)/20);
      if(sec>=1&&sec<=5)announce("§e"+sec,"§fDébut de la manche "+round,22);
     }
@@ -356,7 +371,7 @@ public final class SandWarsMode {
    .then(Commands.literal("swadmin").requires(s->s.hasPermission(2))
     .then(Commands.literal("generate").executes(c->generate(c.getSource())))
     .then(Commands.literal("realign").executes(c->realign(c.getSource())))
-    .then(Commands.literal("start").executes(c->{int n=0;for(Match m:MATCHES)if(m.phase==Phase.WAITING){m.beginRound();n++;}return n;}))
+    .then(Commands.literal("start").executes(c->{int n=0;for(Match m:MATCHES)if(m.phase==Phase.WAITING&&m.canStart()){m.beginRound();n++;}return n;}))
     .then(Commands.literal("status").executes(c->{for(Match m:MATCHES){
      String state="Sand Wars "+(m.index+1)+": "+m.status()+" manches "+m.orangeWins+"-"+m.normalWins;
      c.getSource().sendSuccess(()->Component.literal(state),false);
