@@ -1,0 +1,29 @@
+name: WorldBattles Factions Forge 1.20.1
+on:
+  push:
+    branches: [feature/worldbattles-factions]
+    paths: ['mods/worldbattles-factions/**', '.github/workflows/factions-build.yml']
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.8'
+      - name: Build compatible Shop 0.2.2 API
+        working-directory: mods/worldbattles-shop
+        run: gradle build --no-daemon
+      - name: Build Factions mod
+        working-directory: mods/worldbattles-factions
+        run: gradle build --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WorldBattles-Factions-0.1.0-Forge-1.20.1
+          path: mods/worldbattles-factions/build/libs/*.jar
+          if-no-files-found: error
