@@ -1,0 +1,38 @@
+name: Fix BETA4 modpack download link
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-beta4-download.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix-download:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Point site to the published BETA4 Factions archive
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+          old = "WorldBattles_Modpack_Player_BETA4_Forge_1.20.1.zip"
+          new = "WorldBattles_Modpack_Player_BETA4_Factions_Forge_1.20.1.zip"
+          print("Old download links:", s.count(old))
+          if old not in s and new not in s:
+              raise SystemExit("Could not find BETA4 download link in index.html")
+          updated = s.replace(old, new)
+          p.write_text(updated, encoding="utf-8")
+          PY
+      - name: Commit corrected download links
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Fix BETA4 download link to published Factions archive"
+            git push
+          fi
