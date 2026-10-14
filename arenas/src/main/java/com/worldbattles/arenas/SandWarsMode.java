@@ -112,8 +112,10 @@ public final class SandWarsMode {
   void leave(ServerPlayer p){
    if(teams.remove(p.getUUID())==null)return;
    eliminated.remove(p.getUUID());lobby(p,this);
-   if(teams.isEmpty()){if(phase==Phase.WAITING)phase=Phase.READY;else finish(null);
-   else if(phase==Phase.COUNTDOWN||phase==Phase.ACTIVE)if(!canStart())cancelIfAlone();}
+   if(teams.isEmpty()){
+    if(phase==Phase.WAITING)phase=Phase.READY;
+    else finish(null);
+   }else if((phase==Phase.COUNTDOWN||phase==Phase.ACTIVE)&&!canStart())cancelIfAlone();
    else if(phase==Phase.ACTIVE)checkRoundEnd();
   }
   boolean canStart(){return teams.size()>=2&&count(Team.ORANGE)>0&&count(Team.NORMAL)>0;}
