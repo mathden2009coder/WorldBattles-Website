@@ -29,6 +29,7 @@ public final class FactionsScreen extends Screen {
   for(int i=0;i<ICONS.length;i++)if(ICONS[i].equals(data.getString("Icon")))selection=i;
  }
  public Page page(){return page;}
+ public void update(CompoundTag newData){data=newData;clearWidgets();init();}
  private void dispatch(String op,String value,String extra){FactionsMod.send(op,value,extra);}
  private void action(String op){dispatch(op,primary==null?"":primary.getValue(),"");}
  private void button(String title,int atX,int atY,int width,int height,Runnable callback){
