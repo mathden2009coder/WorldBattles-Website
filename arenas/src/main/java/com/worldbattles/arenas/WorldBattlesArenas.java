@@ -171,7 +171,7 @@ public class WorldBattlesArenas {
     else if(tick%20==0){
      int seconds=(int)Math.max(0,(deadline-tick+19)/20);
      for(UUID id:players){ServerPlayer p=find(id);if(p==null)continue;
-      if(p.distanceToSqr(-95.5+dx,-58,-7.5)>9)p.teleportTo(server.overworld(),-95.5+dx,-58,-7.5,0,0);
+      // Salle d'attente délimitée par des blocs-barrières : pas de téléportation de rappel.
       p.displayClientMessage(Component.literal("§6Zombies "+(index+1)+" §f· Attente §e"+(seconds/60)+":"+String.format("%02d",seconds%60)+" §7· "+players.size()+"/10"),true);
      }
     }
@@ -188,7 +188,7 @@ public class WorldBattlesArenas {
    if(alive<18&&spawned<quota()&&tick-lastSpawn>=12){spawn();lastSpawn=tick;}
    if(tick%20==0)for(UUID id:dead){ServerPlayer p=find(id);if(p!=null){
     p.setInvulnerable(true);
-    if(p.distanceToSqr(-95.5+dx,-58,-7.5)>16)p.teleportTo(server.overworld(),-95.5+dx,-58,-7.5,0,0);
+    // Salle d'attente délimitée par des blocs-barrières : pas de téléportation de rappel.
    }}
   }
   void finish(boolean victory){
