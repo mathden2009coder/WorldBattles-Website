@@ -219,5 +219,12 @@ public final class FactionsScreen extends Screen {
    }
   }
  }
+ @Override public void tick(){
+  super.tick();
+  if(minecraft!=null&&minecraft.player!=null&&
+   !minecraft.player.level().dimension().location().equals(new ResourceLocation("secondworld","overworld"))){
+   onClose();
+  }
+ }
  @Override public boolean isPauseScreen(){return false;}
 }
