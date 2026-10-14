@@ -110,8 +110,10 @@ public final class WorldBattlesMode {
    if(teams.remove(p.getUUID())==null)return;
    killIndicatorUntil.remove(p.getUUID());
    lobby(p,this);
-   if(teams.isEmpty()){if(phase==Phase.WAITING)phase=Phase.READY;else if(phase!=Phase.READY)finish(null);
-   else if(phase==Phase.COUNTDOWN||phase==Phase.ACTIVE)if(!canStart())cancelIfAlone();}
+   if(teams.isEmpty()){
+    if(phase==Phase.WAITING)phase=Phase.READY;
+    else if(phase!=Phase.READY)finish(null);
+   }else if((phase==Phase.COUNTDOWN||phase==Phase.ACTIVE)&&!canStart())cancelIfAlone();
   }
   boolean canStart(){return teams.size()>=2&&count(Team.NETHER)>0&&count(Team.OVERWORLD)>0;}
   void cancelIfAlone(){
