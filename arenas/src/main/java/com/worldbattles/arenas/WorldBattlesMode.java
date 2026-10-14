@@ -58,10 +58,12 @@ public final class WorldBattlesMode {
   final int index,dx;
   final Map<UUID,Team> teams=new LinkedHashMap<>();
   final ServerBossEvent score;
+  final Map<UUID,Long> killIndicatorUntil=new HashMap<>();
   Phase phase=Phase.READY;
   boolean generated;
   long deadline,restoreAt;
   int round=0,netherWins=0,overworldWins=0,netherKills=0,overworldKills=0;
+  int roundTarget=25;
   Match(int index){
    this.index=index;dx=index*300;generated=index==0;
    score=new ServerBossEvent(Component.literal("WORLD BATTLES"),BossEvent.BossBarColor.BLUE,BossEvent.BossBarOverlay.PROGRESS);
@@ -78,12 +80,18 @@ public final class WorldBattlesMode {
    };
   }
   int count(Team t){int count=0;for(Team v:teams.values())if(v==t)count++;return count;}
+  // Scale by the number of combatants, with the objective locked for each round.
+  int calculateRoundTarget(){
+   int players=Math.min(10,Math.max(2,teams.size()));
+   int pairs=Math.min(5,Math.max(1,(players+1)/2));
+   return switch(pairs){case 1->3;case 2->8;case 3->13;case 4->19;default->25;};
+  }
   void titles(String title,String sub,int stay){
    for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p!=null)title(p,title,sub,stay);}
   }
   void updateBar(){
-   score.setName(Component.literal("WORLD BATTLES · Nether "+netherKills+"/25   Overworld "+overworldKills+"/25   |   "+netherWins+"-"+overworldWins));
-   score.setProgress(Math.max(netherKills,overworldKills)/25f);
+   score.setName(Component.literal("WORLD BATTLES · Nether "+netherKills+"/"+roundTarget+"   Overworld "+overworldKills+"/"+roundTarget+"   |   "+netherWins+"-"+overworldWins));
+   score.setProgress(Math.min(1f,Math.max(netherKills,overworldKills)/(float)roundTarget));
   }
   void join(ServerPlayer p){
    if(!generated||phase==Phase.LOCKED||phase==Phase.RESTORING){info(p,"Cette arène est indisponible.");return;}
@@ -100,12 +108,14 @@ public final class WorldBattlesMode {
   }
   void leave(ServerPlayer p){
    if(teams.remove(p.getUUID())==null)return;
+   killIndicatorUntil.remove(p.getUUID());
    lobby(p,this);
    if(teams.isEmpty()){if(phase==Phase.WAITING)phase=Phase.READY;else if(phase!=Phase.READY)finish(null);}
   }
   void prepRound(){
    if(teams.isEmpty()){finish(null);return;}
-   round++;phase=Phase.COUNTDOWN;deadline=ticks+100;netherKills=0;overworldKills=0;updateBar();
+   round++;phase=Phase.COUNTDOWN;deadline=ticks+100;netherKills=0;overworldKills=0;
+   roundTarget=calculateRoundTarget();killIndicatorUntil.clear();updateBar();
    for(var e:teams.entrySet()){ServerPlayer p=find(e.getKey());if(p==null)continue;
     teleportTeam(p,e.getValue());p.setInvulnerable(true);score.addPlayer(p);}
    titles("§eMANCHE "+round,"§fDébut dans 5 secondes",40);
@@ -135,10 +145,19 @@ public final class WorldBattlesMode {
     title(p,winner==null?"§ePARTIE TERMINEE":winner==Team.NETHER?"§cVICTOIRE NETHER !":"§aVICTOIRE OVERWORLD !",
       "§fRetour au lobby",100);
    }
-   teams.clear();score.removeAllPlayers();round=0;netherWins=0;overworldWins=0;netherKills=0;overworldKills=0;
+   teams.clear();killIndicatorUntil.clear();score.removeAllPlayers();round=0;netherWins=0;overworldWins=0;netherKills=0;overworldKills=0;roundTarget=25;
    phase=Phase.RESTORING;restoreAt=ticks+60;
   }
   void step(){
+   if(phase==Phase.ACTIVE&&ticks%10==0){
+    for(var entry:new ArrayList<>(killIndicatorUntil.entrySet())){
+     if(ticks>=entry.getValue()){killIndicatorUntil.remove(entry.getKey());continue;}
+     ServerPlayer killer=find(entry.getKey());Team team=teams.get(entry.getKey());
+     if(killer!=null&&team!=null)killer.displayClientMessage(Component.literal(
+      "§6✦ §aÉLIMINATION ! §f+1 kill §8· §e"+(team==Team.NETHER?netherKills:overworldKills)+
+      "§7/§e"+roundTarget),true);
+    }
+   }
    if(phase==Phase.RESTORING&&ticks>=restoreAt){
     restoreAt=Long.MAX_VALUE;
     if(!restoreMap(this)){phase=Phase.LOCKED;LOG.error("World Battles arena {} locked after restoration failure",index+1);return;}
@@ -158,7 +177,7 @@ public final class WorldBattlesMode {
    if(phase==Phase.COUNTDOWN){
     if(ticks%20==0){int left=(int)((deadline-ticks+19)/20);if(left>0&&left<=5)titles("§e"+left,"§fDébut de la manche "+round,21);}
     if(ticks>=deadline){phase=Phase.ACTIVE;for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p!=null)p.setInvulnerable(false);}
-     titles("§cCOMBAT !","§f25 éliminations pour gagner",45);}
+     titles("§cCOMBAT !","§f"+roundTarget+" éliminations pour gagner",45);}
    }
   }
   void eliminate(ServerPlayer victim,ServerPlayer killer){
@@ -168,12 +187,17 @@ public final class WorldBattlesMode {
    if(killerTeam!=null&&killerTeam!=victimTeam){
     if(killerTeam==Team.NETHER)netherKills++;else overworldKills++;
     updateBar();
+    // World Battles only: short, non-intrusive elimination confirmation for the killer.
+    killIndicatorUntil.put(killer.getUUID(),ticks+40);
+    killer.displayClientMessage(Component.literal("§6✦ §aÉLIMINATION ! §f+1 kill §8· §e"+
+      (killerTeam==Team.NETHER?netherKills:overworldKills)+"§7/§e"+roundTarget),true);
    }
    victim.setHealth(victim.getMaxHealth());
    victim.clearFire();victim.removeAllEffects();
    teleportTeam(victim,victimTeam);
    title(victim,"§cELIMINE !","§fRetour dans ta base",40);
-   if(netherKills>=25||overworldKills>=25)endRound(netherKills>=25?Team.NETHER:Team.OVERWORLD);
+   if(netherKills>=roundTarget||overworldKills>=roundTarget)
+    endRound(netherKills>=roundTarget?Team.NETHER:Team.OVERWORLD);
   }
  }
  private static MinecraftServer server;
@@ -270,6 +294,10 @@ public final class WorldBattlesMode {
    .then(Commands.literal("wbadmin").requires(c->c.hasPermission(2))
     .then(Commands.literal("generate").executes(c->generate(c.getSource())))
     .then(Commands.literal("start").executes(c->{int n=0;for(Match m:MATCHES)if(m.phase==Phase.WAITING){m.prepRound();n++;}return n;}))
+    .then(Commands.literal("testtarget")
+     .then(Commands.argument("arena",IntegerArgumentType.integer(1,3))
+      .then(Commands.literal("nether").executes(c->simulate25(c.getSource(),IntegerArgumentType.getInteger(c,"arena"),Team.NETHER)))
+      .then(Commands.literal("overworld").executes(c->simulate25(c.getSource(),IntegerArgumentType.getInteger(c,"arena"),Team.OVERWORLD)))))
     .then(Commands.literal("test25")
      .then(Commands.argument("arena",IntegerArgumentType.integer(1,3))
       .then(Commands.literal("nether").executes(c->simulate25(c.getSource(),IntegerArgumentType.getInteger(c,"arena"),Team.NETHER)))
@@ -283,9 +311,10 @@ public final class WorldBattlesMode {
   if(match.phase!=Phase.ACTIVE){
    source.sendFailure(Component.literal("World Battles : l'arène "+arena+" n'est pas en combat."));return 0;
   }
-  if(winner==Team.NETHER)match.netherKills=25;else match.overworldKills=25;
+  if(winner==Team.NETHER)match.netherKills=match.roundTarget;else match.overworldKills=match.roundTarget;
   match.updateBar();match.endRound(winner);
-  source.sendSuccess(()->Component.literal("TEST : 25 kills simulés pour "+winner+" dans l'arène "+arena+
+  int goal=match.roundTarget;
+  source.sendSuccess(()->Component.literal("TEST : "+goal+" kills simulés pour "+winner+" dans l'arène "+arena+
     ". Ce test valide le passage à la manche suivante, pas les éliminations PvP."),false);
   return 1;
  }
@@ -314,7 +343,7 @@ public final class WorldBattlesMode {
  @SubscribeEvent public void logout(PlayerEvent.PlayerLoggedOutEvent event){
   if(!(event.getEntity() instanceof ServerPlayer p))return;
   Match m=getMatch(p.getUUID());if(m==null)return;
-  m.teams.remove(p.getUUID());m.score.removePlayer(p);
+  m.teams.remove(p.getUUID());m.killIndicatorUntil.remove(p.getUUID());m.score.removePlayer(p);
   p.removeTag(ACTIVE);p.addTag(RECOVER);p.setInvulnerable(false);
   if(m.teams.isEmpty())m.finish(null);
  }
