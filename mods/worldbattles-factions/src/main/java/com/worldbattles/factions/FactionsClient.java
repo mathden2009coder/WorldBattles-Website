@@ -10,6 +10,6 @@ public final class FactionsClient {
   Minecraft client=Minecraft.getInstance();
   if(client.level==null)return;
   if(client.screen instanceof FactionsScreen current){current.update(packet);return;}
-  client.setScreen(new FactionsScreen(packet,FactionsScreen.Page.HOME));
+  if(packet.getBoolean("ForceOpen"))client.setScreen(new FactionsScreen(packet,FactionsScreen.Page.HOME));
  }
 }
