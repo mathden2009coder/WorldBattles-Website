@@ -82,11 +82,11 @@ public final class FactionsScreen extends Screen {
    button("ACCEPTER INVITATION",contentX+11,y+118,Math.min(156,contentW-23),22,()->dispatch("accept","",""));
    button("REFUSER",contentX+172,y+118,Math.min(90,contentW-190),22,()->dispatch("decline","",""));
   }
-  primary=edit("Nom de faction (3-16 caractères)",contentX+12,y+177,contentW-26,16);
+  primary=edit("Nom de faction (3-16 caractères)",contentX+12,y+170,contentW-26,16);
   for(int i=0;i<ICONS.length;i++){
    final int index=i;
    int px=contentX+12+(i%6)*Math.max(32,(contentW-28)/6);
-   int py=y+210+(i/6)*29;
+   int py=y+216+(i/6)*29;
    button(selection==i?"*":"",px,py,Math.min(42,(contentW-28)/6-2),25,()->{selection=index;});
   }
   button("CRÉER POUR 100 000 $",contentX+13,y+h-37,Math.min(188,contentW-24),22,
@@ -156,11 +156,11 @@ public final class FactionsScreen extends Screen {
   if(!data.getString("Invite").isEmpty()){
    fitText(g,"Invitation : "+data.getString("Invite"),contentX+11,y+144,contentW-22,ORANGE);
   }
-  text(g,"NOM DE FACTION",contentX+12,y+164,MUTED);
-  text(g,"CHOISIS UN EMBLÈME",contentX+12,y+197,MUTED);
+  text(g,"NOM DE FACTION",contentX+12,y+156,MUTED);
+  text(g,"CHOISIS UN EMBLÈME",contentX+12,y+200,MUTED);
   for(int i=0;i<ICONS.length;i++){
    int px=contentX+12+(i%6)*Math.max(32,(contentW-28)/6);
-   int py=y+210+(i/6)*29;
+   int py=y+216+(i/6)*29;
    if(i==selection)g.fill(px-2,py-2,px+26,py+24,0x55FFA12C);
    g.renderItem(stack(ICONS[i]),px+8,py+5);
   }
