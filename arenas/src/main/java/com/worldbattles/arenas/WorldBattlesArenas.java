@@ -92,7 +92,7 @@ public class WorldBattlesArenas {
    if(findArena(p.getUUID())!=null){message(p,"Tu es déjà dans une arène.");return;}
    if(phase!=Phase.AVAILABLE&&phase!=Phase.WAITING){message(p,"Partie déjà en cours.");return;}
    if(players.size()>=10){message(p,"Cette arène est complète.");return;}
-   if(phase==Phase.AVAILABLE){phase=Phase.WAITING;deadline=tick+2400;}
+   if(phase==Phase.AVAILABLE){phase=Phase.WAITING;deadline=tick+1200;}
    clearOverworld(p);players.add(p.getUUID());p.addTag(TAG);p.setInvulnerable(true);p.setGameMode(GameType.ADVENTURE);
    p.teleportTo(server.overworld(),-95.5+dx,-58,-7.5,0,0);
    announce("§6ZOMBIES "+(index+1),"§f"+players.size()+"/10 joueurs · Départ dans "+Math.max(0,(deadline-tick+19)/20)+" s",45);
