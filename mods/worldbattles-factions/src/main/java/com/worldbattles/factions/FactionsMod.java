@@ -64,7 +64,7 @@ public final class FactionsMod {
  private static void notifyFaction(MinecraftServer server,FactionData.Faction faction,String message){
   for(UUID id:faction.members.keySet()){
    ServerPlayer p=server.getPlayerList().getPlayer(id);
-   if(p!=null){feedback(p,message);if(allowed(p))snapshot(p,"");}
+   if(p!=null){feedback(p,message);if(allowed(p))snapshot(p,"",false);}
   }
  }
  private static long positive(String str){
@@ -145,7 +145,7 @@ public final class FactionsMod {
     if(f.members.size()>=FactionData.MAX_MEMBERS){outcome="Faction complète (30 membres).";break;}
     INVITES.put(target.getUUID(),new Invitation(f.name.toLowerCase(Locale.ROOT),System.currentTimeMillis()+300_000));
     feedback(target,"Invitation à rejoindre §e"+f.name+"§f ! Ouvre /factions (expire dans 5 min).");
-    snapshot(target,"Invitation reçue de "+f.name);
+    snapshot(target,"Invitation reçue de "+f.name,false);
     outcome="Invitation envoyée à "+target.getGameProfile().getName()+".";
    }
    case "accept"->{
@@ -201,7 +201,7 @@ public final class FactionsMod {
     }
     f.log(outcome);data.setDirty();
     ServerPlayer affected=server.getPlayerList().getPlayer(targetId);
-    if(affected!=null){feedback(affected,outcome);if(allowed(affected))snapshot(affected,"");}
+    if(affected!=null){feedback(affected,outcome);if(allowed(affected))snapshot(affected,"",false);}
    }
    case "setdesc"->{
     if(f==null||!f.officer(id)){outcome="Réservé aux officiers.";break;}
@@ -270,12 +270,14 @@ public final class FactionsMod {
   feedback(p,outcome);
   snapshot(p,outcome);
  }
- private static void snapshot(ServerPlayer player,String notice){
+ private static void snapshot(ServerPlayer player,String notice){snapshot(player,notice,true);}
+ private static void snapshot(ServerPlayer player,String notice,boolean forceOpen){
   if(!allowed(player))return;
   MinecraftServer server=player.getServer();FactionData data=FactionData.get(server);
   FactionData.Faction f=data.of(player.getUUID());
   CompoundTag root=new CompoundTag();
-  root.putString("Notice",notice);root.putLong("Balance",ShopData.get(server).balance(player.getUUID()));
+  root.putString("Notice",notice);root.putBoolean("ForceOpen",forceOpen);
+  root.putLong("Balance",ShopData.get(server).balance(player.getUUID()));
   root.putLong("Cost",CREATE_COST);root.putString("Player",player.getGameProfile().getName());
   Invitation invite=INVITES.get(player.getUUID());
   root.putString("Invite",invite!=null&&invite.expiry()>System.currentTimeMillis()?
