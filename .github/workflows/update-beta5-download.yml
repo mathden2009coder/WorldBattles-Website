@@ -1,0 +1,38 @@
+name: Update site modpack to BETA5
+on:
+  push:
+    paths:
+      - '.github/workflows/update-beta5-download.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update-beta5:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update published player pack details
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          old="https://github.com/mathden2009coder/WorldBattles-Website/releases/download/beta-4/WorldBattles_Modpack_Player_BETA4_Factions_Forge_1.20.1.zip"
+          new="https://github.com/mathden2009coder/WorldBattles-Website/releases/download/beta-5/WorldBattles_Modpack_Player_BETA5_Forge_1.20.1.zip"
+          if old not in s:
+              raise SystemExit("Expected BETA4 download link not present: refusing to modify index.html")
+          s=s.replace(old,new)
+          s=s.replace("Player BETA 4","Player BETA 5").replace("Player BETA4","Player BETA5")
+          s=s.replace("PACK JOUEUR BETA 4","PACK JOUEUR BETA 5").replace("PACK JOUEUR BETA4","PACK JOUEUR BETA5")
+          p.write_text(s,encoding="utf-8")
+          print("BETA5 download URL occurrences:",s.count(new))
+          PY
+      - name: Commit site update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish BETA5 modpack download on WorldBattles site"
+            git push
+          fi
