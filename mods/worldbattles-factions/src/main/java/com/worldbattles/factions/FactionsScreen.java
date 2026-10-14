@@ -67,7 +67,7 @@ public final class FactionsScreen extends Screen {
    button(labels[i],x+10,tabY+i*36,bW,27,()->{page=chosen;clearWidgets();init();});
   }
   button("X",x+w-29,y+12,18,18,this::onClose);
-  if(!joined()){showCreate();return;}
+  if(!joined()){if(page==Page.LEADERBOARD)showLeaderboard();else showCreate();return;}
   switch(page){
    case HOME->showHome();
    case MEMBERS->showMembers();
@@ -142,7 +142,7 @@ public final class FactionsScreen extends Screen {
   text(g,"FREELANDS  /  ÉCONOMIE  /  CLASSEMENT",x+14,y+31,MUTED);
   g.fill(x+108,y+65,x+109,y+h-14,0xFF31445B);
   g.fill(contentX,y+65,contentX+contentW,y+h-55,0x361C314A);
-  if(joined())renderMember(g);
+  if(joined()||page==Page.LEADERBOARD)renderMember(g);
   else renderCreate(g);
   String note=data.getString("Notice");
   if(!note.isEmpty())fitText(g,note,x+16,y+h-16,w-35,GREEN);
