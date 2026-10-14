@@ -9,7 +9,7 @@ public final class FactionsClient {
  public static void receive(CompoundTag packet){
   Minecraft client=Minecraft.getInstance();
   if(client.level==null)return;
-  FactionsScreen.Page page=client.screen instanceof FactionsScreen current?current.page():FactionsScreen.Page.HOME;
-  client.setScreen(new FactionsScreen(packet,page));
+  if(client.screen instanceof FactionsScreen current){current.update(packet);return;}
+  client.setScreen(new FactionsScreen(packet,FactionsScreen.Page.HOME));
  }
 }
