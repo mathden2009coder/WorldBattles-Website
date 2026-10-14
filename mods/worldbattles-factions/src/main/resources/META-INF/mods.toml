@@ -1,0 +1,31 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="worldbattlesfactions"
+version="0.1.0"
+displayName="WorldBattles Factions"
+description='''Freelands-only factions with a custom interface, Shop-backed economy, emblem selection, treasury, ranks, members and invitations.'''
+displayTest="MATCH_VERSION"
+
+[[dependencies.worldbattlesfactions]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.worldbattlesfactions]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.worldbattlesfactions]]
+modId="worldbattlesshop"
+mandatory=true
+versionRange="[0.2.2,)"
+ordering="AFTER"
+side="BOTH"
