@@ -192,7 +192,7 @@ public final class SandWarsMode {
     else if(ticks%20==0){int seconds=(int)Math.max(0,(deadline-ticks+19)/20);
      for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p==null)continue;
       p.setInvulnerable(true);
-      if(p.distanceToSqr(118.5,-59+verticalOffset+(index==0?0:1),43.5+dz)>9)waitRoom(p);
+      // Salle d'attente délimitée par des blocs-barrières : pas de téléportation de rappel.
       p.displayClientMessage(Component.literal("§6Sand Wars §f· "+seconds/60+":"+String.format("%02d",seconds%60)+" · "+teams.size()+"/10"),true);
      }
     }
@@ -212,7 +212,7 @@ public final class SandWarsMode {
    if(phase==Phase.ACTIVE&&ticks%20==0)for(UUID id:eliminated){
     ServerPlayer p=find(id);if(p==null)continue;
     p.setInvulnerable(true);
-    if(p.distanceToSqr(118.5,-59+verticalOffset+(index==0?0:1),43.5+dz)>16)waitRoom(p);
+    // Salle d'attente délimitée par des blocs-barrières : pas de téléportation de rappel.
    }
   }
  }
