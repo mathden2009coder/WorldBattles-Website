@@ -99,7 +99,7 @@ public final class WorldBattlesMode {
    if(p.level().dimension()!=Level.OVERWORLD){info(p,"Rejoins le lobby.");return;}
    if(teams.size()>=10){info(p,"Arène pleine.");return;}
    if(p.getTags().contains(ACTIVE)||getMatch(p.getUUID())!=null){info(p,"Tu participes déjà à un mini-jeu.");return;}
-   if(phase==Phase.READY){phase=Phase.WAITING;deadline=ticks+2400;}
+   if(phase==Phase.READY){phase=Phase.WAITING;deadline=ticks+1200;}
    Team team=count(Team.NETHER)<=count(Team.OVERWORLD)?Team.NETHER:Team.OVERWORLD;
    clear(p);teams.put(p.getUUID(),team);p.addTag(ACTIVE);
    p.setGameMode(GameType.ADVENTURE);p.setInvulnerable(true);
@@ -110,9 +110,22 @@ public final class WorldBattlesMode {
    if(teams.remove(p.getUUID())==null)return;
    killIndicatorUntil.remove(p.getUUID());
    lobby(p,this);
-   if(teams.isEmpty()){if(phase==Phase.WAITING)phase=Phase.READY;else if(phase!=Phase.READY)finish(null);}
+   if(teams.isEmpty()){if(phase==Phase.WAITING)phase=Phase.READY;else if(phase!=Phase.READY)finish(null);
+   else if(phase==Phase.COUNTDOWN||phase==Phase.ACTIVE)if(!canStart())cancelIfAlone();}
+  }
+  boolean canStart(){return teams.size()>=2&&count(Team.NETHER)>0&&count(Team.OVERWORLD)>0;}
+  void cancelIfAlone(){
+   if(canStart())return;
+   for(UUID id:new ArrayList<>(teams.keySet())){ServerPlayer p=find(id);if(p!=null){
+    info(p,"Partie annulée : il faut au moins 2 joueurs, un dans chaque équipe.");
+    title(p,"§ePARTIE ANNULÉE","§fPas assez de joueurs · Retour au spawn",60);
+   }}
+   // finish() returns each participant to the lobby, clears the match state and restores the arena.
+   if(phase==Phase.RESTORING)phase=Phase.COUNTDOWN;
+   finish(null);
   }
   void prepRound(){
+   if(!canStart()){cancelIfAlone();return;}
    if(teams.isEmpty()){finish(null);return;}
    round++;phase=Phase.COUNTDOWN;deadline=ticks+100;netherKills=0;overworldKills=0;
    roundTarget=calculateRoundTarget();killIndicatorUntil.clear();updateBar();
@@ -162,10 +175,11 @@ public final class WorldBattlesMode {
     restoreAt=Long.MAX_VALUE;
     if(!restoreMap(this)){phase=Phase.LOCKED;LOG.error("World Battles arena {} locked after restoration failure",index+1);return;}
     if(teams.isEmpty()){phase=Phase.READY;return;}
+    if(!canStart()){cancelIfAlone();return;}
     prepRound();
    }
    if(phase==Phase.WAITING){
-    if(ticks>=deadline)prepRound();
+    if(ticks>=deadline){if(canStart())prepRound();else cancelIfAlone();}
     else if(ticks%20==0){int remaining=(int)Math.max(0,(deadline-ticks+19)/20);
      for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p!=null){
       p.setInvulnerable(true);
@@ -175,6 +189,7 @@ public final class WorldBattlesMode {
     }
    }
    if(phase==Phase.COUNTDOWN){
+    if(!canStart()){cancelIfAlone();return;}
     if(ticks%20==0){int left=(int)((deadline-ticks+19)/20);if(left>0&&left<=5)titles("§e"+left,"§fDébut de la manche "+round,21);}
     if(ticks>=deadline){phase=Phase.ACTIVE;for(UUID id:teams.keySet()){ServerPlayer p=find(id);if(p!=null)p.setInvulnerable(false);}
      titles("§cCOMBAT !","§f"+roundTarget+" éliminations pour gagner",45);}
@@ -293,7 +308,7 @@ public final class WorldBattlesMode {
      .executes(c->{open(EntityArgument.getPlayer(c,"joueur"));return 1;}))))
    .then(Commands.literal("wbadmin").requires(c->c.hasPermission(2))
     .then(Commands.literal("generate").executes(c->generate(c.getSource())))
-    .then(Commands.literal("start").executes(c->{int n=0;for(Match m:MATCHES)if(m.phase==Phase.WAITING){m.prepRound();n++;}return n;}))
+    .then(Commands.literal("start").executes(c->{int n=0;for(Match m:MATCHES)if(m.phase==Phase.WAITING&&m.canStart()){m.prepRound();n++;}return n;}))
     .then(Commands.literal("testtarget")
      .then(Commands.argument("arena",IntegerArgumentType.integer(1,3))
       .then(Commands.literal("nether").executes(c->simulate25(c.getSource(),IntegerArgumentType.getInteger(c,"arena"),Team.NETHER)))
