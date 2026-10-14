@@ -112,6 +112,8 @@ public final class FactionsMod {
  private static void perform(ServerPlayer p,Action a){
   if(!allowed(p)){feedback(p,"Factions désactivées ici : rejoins les Freelands.");return;}
   String op=a.operation(),arg=a.argument().trim(),extra=a.extra().trim();
+  // Strip Minecraft formatting/control characters from user-supplied text.
+  if(op.equals("chat")||op.equals("setdesc"))arg=arg.replaceAll("§[0-9a-fk-orA-FK-OR]", "").replaceAll("[\\\\p{Cntrl}]", " ").trim();
   MinecraftServer server=p.getServer();
   FactionData data=FactionData.get(server);
   FactionData.Faction f=data.of(p.getUUID());
