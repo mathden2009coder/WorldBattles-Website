@@ -1,6 +1,14 @@
 package com.worldbattles.protection;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.GameType;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -27,7 +35,44 @@ public final class WorldBattlesProtection {
     private static final ResourceLocation MINAGE = new ResourceLocation("minage", "overworld");
 
 
+    // Only SecondWorld and Minage control game mode; Arenas in the vanilla Overworld own theirs.
+    private final Map<UUID, Boolean> lastInside = new HashMap<>();
+
     public WorldBattlesProtection() { MinecraftForge.EVENT_BUS.register(this); }
+
+    @SubscribeEvent
+    public void onTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+        UUID id = player.getUUID();
+        ResourceLocation dim = player.level().dimension().location();
+        if (!dim.equals(SECOND) && !dim.equals(MINAGE)) {
+            lastInside.remove(id);
+            return;
+        }
+        if (exempt(player)) {
+            lastInside.remove(id);
+            return;
+        }
+        boolean inside = protectedAt(player, player.blockPosition());
+        Boolean previous = lastInside.put(id, inside);
+        if (previous != null && previous == inside) return;
+        // At first observation, correct stale Adventure mode outside the zone,
+        // without modifying players in an unprotected dimension.
+        if (inside) {
+            if (player.gameMode.getGameModeForPlayer() == GameType.SURVIVAL)
+                player.setGameMode(GameType.ADVENTURE);
+        } else if (player.gameMode.getGameModeForPlayer() == GameType.ADVENTURE) {
+            player.setGameMode(GameType.SURVIVAL);
+        }
+        if (previous != null && previous != inside) {
+            player.displayClientMessage(inside
+                ? Component.literal("🛡 Vous entrez dans une zone protégée !").withStyle(ChatFormatting.GREEN)
+                : Component.literal("⚔ Vous quittez la zone protégée !").withStyle(ChatFormatting.RED), true);
+        }
+    }
+    @SubscribeEvent public void onLogout(PlayerEvent.PlayerLoggedOutEvent event) { lastInside.remove(event.getEntity().getUUID()); }
+    @SubscribeEvent public void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) { lastInside.remove(event.getEntity().getUUID()); }
+
     private static boolean protectedAt(Player player, BlockPos pos) {
         ResourceLocation dimension = player.level().dimension().location();
         if (dimension.equals(OVERWORLD)) return true;
