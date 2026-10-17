@@ -15,7 +15,7 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-/** ALPHA: Arenas 0.4.1 does not yet grant permissions; NOT FOR LIVE SERVER. */
+/** ALPHA: player building is forbidden in arenas; automatic arena map restores remain unaffected. */
 @Mod(WorldBattlesProtection.MOD_ID)
 public final class WorldBattlesProtection {
     public static final String MOD_ID = "worldbattlesprotection";
@@ -36,21 +36,21 @@ public final class WorldBattlesProtection {
     }
     private static boolean exempt(Player player) { return player.isCreative() || player.isSpectator(); }
     @SubscribeEvent public void onBreak(BlockEvent.BreakEvent event) {
-        if (event.getPlayer() instanceof ServerPlayer player && protectedAt(player, event.getPos()))
+        if (event.getPlayer() instanceof ServerPlayer player && !exempt(player) && protectedAt(player, event.getPos()))
             event.setCanceled(true);
     }
     @SubscribeEvent public void onPlace(BlockEvent.EntityPlaceEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof ServerPlayer player && protectedAt(player, event.getPos()))
+        if (entity instanceof ServerPlayer player && !exempt(player) && protectedAt(player, event.getPos()))
             event.setCanceled(true);
     }
     @SubscribeEvent public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || !protectedAt(player, event.getPos())) return;
+        if (!(event.getEntity() instanceof ServerPlayer player) || exempt(player) || !protectedAt(player, event.getPos())) return;
         if (event.getItemStack().getItem() instanceof BlockItem || event.getItemStack().getItem() instanceof BucketItem)
             event.setUseItem(net.minecraftforge.eventbus.api.Event.Result.DENY);
     }
     @SubscribeEvent public void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || !protectedAt(player, player.blockPosition())) return;
+        if (!(event.getEntity() instanceof ServerPlayer player) || exempt(player) || !protectedAt(player, player.blockPosition())) return;
         if (event.getItemStack().getItem() instanceof BucketItem) event.setCanceled(true);
     }
     private static boolean noDamage(ServerPlayer player) {
