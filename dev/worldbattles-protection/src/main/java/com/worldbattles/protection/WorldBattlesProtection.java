@@ -10,11 +10,6 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.TickEvent;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,39 +25,8 @@ public final class WorldBattlesProtection {
     private static final ResourceLocation OVERWORLD = new ResourceLocation("minecraft", "overworld");
     private static final ResourceLocation SECOND = new ResourceLocation("secondworld", "overworld");
     private static final ResourceLocation MINAGE = new ResourceLocation("minage", "overworld");
-    private static final Map<UUID, Integer> ARENA_BUILDERS = new HashMap<>();
-    private static final int MAX_GRANT_TICKS = 20 * 60 * 15;
-    public static void grantArenaBuilding(ServerPlayer player, int ticks) {
-        if (!player.level().dimension().location().equals(OVERWORLD)) return;
-        if (ticks <= 0) { revokeArenaBuilding(player); return; }
-        ARENA_BUILDERS.put(player.getUUID(), player.tickCount + Math.min(ticks, MAX_GRANT_TICKS));
-    }
-    public static void revokeArenaBuilding(ServerPlayer player) { ARENA_BUILDERS.remove(player.getUUID()); }
-    public static void setArenaBuildingAllowed(ServerPlayer player, boolean allowed) {
-        if (allowed) grantArenaBuilding(player, MAX_GRANT_TICKS);
-        else revokeArenaBuilding(player);
-    }
-    private static boolean canBuild(Player player) {
-        if (exempt(player)) return true;
-        if (!(player instanceof ServerPlayer serverPlayer)) return false;
-        if (!player.level().dimension().location().equals(OVERWORLD)) return false;
-        Integer until = ARENA_BUILDERS.get(player.getUUID());
-        if (until == null) return false;
-        if (serverPlayer.tickCount > until) {
-            ARENA_BUILDERS.remove(player.getUUID());
-            return false;
-        }
-        return true;
-    }
-    @SubscribeEvent public void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        Integer until = ARENA_BUILDERS.get(player.getUUID());
-        if (until != null && (player.tickCount > until || !player.level().dimension().location().equals(OVERWORLD)))
-            ARENA_BUILDERS.remove(player.getUUID());
-    }
-    @SubscribeEvent public void onLogout(PlayerEvent.PlayerLoggedOutEvent event) { ARENA_BUILDERS.remove(event.getEntity().getUUID()); }
-    @SubscribeEvent public void onRespawn(PlayerEvent.PlayerRespawnEvent event) { ARENA_BUILDERS.remove(event.getEntity().getUUID()); }
-    @SubscribeEvent public void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) { ARENA_BUILDERS.remove(event.getEntity().getUUID()); }
+
+
     public WorldBattlesProtection() { MinecraftForge.EVENT_BUS.register(this); }
     private static boolean protectedAt(Player player, BlockPos pos) {
         ResourceLocation dimension = player.level().dimension().location();
@@ -72,21 +36,21 @@ public final class WorldBattlesProtection {
     }
     private static boolean exempt(Player player) { return player.isCreative() || player.isSpectator(); }
     @SubscribeEvent public void onBreak(BlockEvent.BreakEvent event) {
-        if (event.getPlayer() instanceof ServerPlayer player && !canBuild(player) && protectedAt(player, event.getPos()))
+        if (event.getPlayer() instanceof ServerPlayer player && protectedAt(player, event.getPos()))
             event.setCanceled(true);
     }
     @SubscribeEvent public void onPlace(BlockEvent.EntityPlaceEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof ServerPlayer player && !canBuild(player) && protectedAt(player, event.getPos()))
+        if (entity instanceof ServerPlayer player && protectedAt(player, event.getPos()))
             event.setCanceled(true);
     }
     @SubscribeEvent public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || canBuild(player) || !protectedAt(player, event.getPos())) return;
+        if (!(event.getEntity() instanceof ServerPlayer player) || !protectedAt(player, event.getPos())) return;
         if (event.getItemStack().getItem() instanceof BlockItem || event.getItemStack().getItem() instanceof BucketItem)
             event.setUseItem(net.minecraftforge.eventbus.api.Event.Result.DENY);
     }
     @SubscribeEvent public void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || canBuild(player) || !protectedAt(player, player.blockPosition())) return;
+        if (!(event.getEntity() instanceof ServerPlayer player) || !protectedAt(player, player.blockPosition())) return;
         if (event.getItemStack().getItem() instanceof BucketItem) event.setCanceled(true);
     }
     private static boolean noDamage(ServerPlayer player) {
