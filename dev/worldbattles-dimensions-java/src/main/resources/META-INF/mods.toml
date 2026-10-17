@@ -1,0 +1,20 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+[[mods]]
+modId="worldbattlesdimensions"
+version="${file.jarVersion}"
+displayName="WorldBattles Dimensions"
+description='''Custom dimensions and portal orientation fix, ALPHA.'''
+[[dependencies.worldbattlesdimensions]]
+modId="forge"
+mandatory=true
+versionRange="[47.4.10,)"
+ordering="NONE"
+side="SERVER"
+[[dependencies.worldbattlesdimensions]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="SERVER"
