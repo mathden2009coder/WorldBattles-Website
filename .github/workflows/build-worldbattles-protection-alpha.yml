@@ -1,0 +1,29 @@
+name: Build WorldBattles Protection alpha
+on:
+  push:
+    branches: [dev/protection-jar-build]
+    paths:
+      - 'dev/worldbattles-protection/**'
+      - '.github/workflows/build-worldbattles-protection-alpha.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.8'
+      - name: Build Forge 1.20.1 JAR
+        working-directory: dev/worldbattles-protection
+        run: gradle --no-daemon build --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldbattles-protection-0.4.0-ALPHA-JAR
+          path: dev/worldbattles-protection/build/libs/*.jar
+          if-no-files-found: error
