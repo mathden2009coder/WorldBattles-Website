@@ -1,0 +1,8 @@
+plugins { id 'net.minecraftforge.gradle' version '[6.0,6.2)' }
+group = 'com.worldbattles'
+version = '0.2.0-ALPHA'
+base { archivesName = 'worldbattles-dimensions' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+minecraft { mappings channel: 'official', version: '1.20.1' }
+repositories { maven { url = 'https://maven.minecraftforge.net' } }
+dependencies { minecraft 'net.minecraftforge:forge:1.20.1-47.4.10' }
