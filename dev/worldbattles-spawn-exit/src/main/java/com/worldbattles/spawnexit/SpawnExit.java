@@ -35,7 +35,7 @@ public final class SpawnExit {
             try{
                 Class<?> owner=Class.forName(PREFIX+MODES[i]);
                 Class<?> session=Class.forName(PREFIX+MODES[i]+(i==2?"$Arena":"$Match"));
-                FINDS[i]=owner.getDeclaredMethod(i==2?"findArena":"findMatch",UUID.class);
+                FINDS[i]=owner.getDeclaredMethod(i==2?"findArena":(i==1?"getMatch":"findMatch"),UUID.class);
                 LEAVES[i]=session.getDeclaredMethod("leave",ServerPlayer.class);
                 FINDS[i].setAccessible(true);
                 LEAVES[i].setAccessible(true);
