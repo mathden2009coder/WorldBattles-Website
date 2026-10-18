@@ -22,6 +22,12 @@ with open(b64_path, "r", encoding="ascii") as f:
     icon_data = base64.b64decode(f.read().strip())
 with open(root + "/item/wind_chestplate.png", "wb") as f:
     f.write(icon_data)
+# Keep the base64 source out of the final mod resources.
+os.remove(b64_path)
+
+# Always ship pack metadata: without it Minecraft may not load the mod resources/data.
+with open("src/main/resources/pack.mcmeta", "w", encoding="utf-8") as f:
+    f.write('{"pack":{"pack_format":15,"description":"WorldBattles Wind Chestplate resources (Minecraft 1.20.1)"}}\\n')
 
 clear = (0, 0, 0, 0)
 edge = (24, 22, 26, 255)
