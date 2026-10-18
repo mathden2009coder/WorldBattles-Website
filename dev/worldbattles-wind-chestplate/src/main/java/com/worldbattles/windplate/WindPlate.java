@@ -4,6 +4,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import org.joml.Vector3f;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterials;
@@ -55,7 +58,10 @@ public final class WindPlate {
       Vec3 motion=p.getDeltaMovement();
       p.setDeltaMovement(motion.x,0.68,motion.z);
       p.hurtMarked=true;
-      p.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD,p.getX(),p.getY()+0.2,p.getZ(),14,0.4,0.1,0.4,0.035);
+      p.serverLevel().sendParticles(ParticleTypes.CLOUD,p.getX(),p.getY()+0.15,p.getZ(),12,0.32,0.08,0.32,0.025);
+      // A visible cyan burst and a few diamond-like sparkles mark the extra jump.
+      p.serverLevel().sendParticles(new DustParticleOptions(new Vector3f(0.08F,0.72F,1.0F),0.8F),p.getX(),p.getY()+0.12,p.getZ(),16,0.32,0.10,0.32,0.015);
+      p.serverLevel().sendParticles(ParticleTypes.END_ROD,p.getX(),p.getY()+0.15,p.getZ(),8,0.25,0.12,0.25,0.01);
     });
     ctx.setPacketHandled(true);
   }
