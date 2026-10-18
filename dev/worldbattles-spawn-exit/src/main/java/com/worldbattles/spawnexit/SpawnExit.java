@@ -1,6 +1,9 @@
 package com.worldbattles.spawnexit;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Field;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
@@ -24,6 +27,9 @@ public final class SpawnExit {
     private static final String[] MODES={"SandWarsMode","WorldBattlesMode","WorldBattlesArenas"};
     private static final Method[] FINDS=new Method[MODES.length];
     private static final Method[] LEAVES=new Method[MODES.length];
+    private static final Field[] PHASES=new Field[MODES.length];
+    private static final Field[] INDICES=new Field[MODES.length];
+    private static final String[] LABELS={"SandWars","WorldsBattle","Zombies"};
     private static boolean initAttempted=false;
 
     public SpawnExit(){MinecraftForge.EVENT_BUS.register(this);}
@@ -39,6 +45,10 @@ public final class SpawnExit {
                 LEAVES[i]=session.getDeclaredMethod("leave",ServerPlayer.class);
                 FINDS[i].setAccessible(true);
                 LEAVES[i].setAccessible(true);
+                PHASES[i]=session.getDeclaredField("phase");
+                PHASES[i].setAccessible(true);
+                INDICES[i]=session.getDeclaredField("index");
+                INDICES[i].setAccessible(true);
             }catch(ReflectiveOperationException | RuntimeException ex){
                 LOGGER.error("Cannot link Arenas 0.4.1 mode {}. Leave-on-spawn unavailable for that mode.",MODES[i],ex);
             }
@@ -58,7 +68,15 @@ public final class SpawnExit {
             try{
                 Object instance=FINDS[i].invoke(null,player.getUUID());
                 if(instance!=null){
+                    // Snapshot the state BEFORE leave() modifies or resets the match.
+                    String state=String.valueOf(PHASES[i].get(instance));
+                    int arenaNumber=((Number)INDICES[i].get(instance)).intValue()+1;
+                    boolean waiting=state.equals("WAITING")||state.equals("COUNTDOWN");
                     LEAVES[i].invoke(instance,player);
+                    String destination=waiting?"salle d'attente":"partie";
+                    player.sendSystemMessage(Component.literal("✦ ").withStyle(ChatFormatting.GOLD)
+                        .append(Component.literal("Sortie de la "+destination).withStyle(ChatFormatting.YELLOW))
+                        .append(Component.literal(" • "+LABELS[i]+" #"+arenaNumber).withStyle(ChatFormatting.GRAY)));
                     LOGGER.info("Player {} left {} via /spawn",player.getGameProfile().getName(),MODES[i]);
                 }
             }catch(ReflectiveOperationException | RuntimeException ex){
