@@ -1,0 +1,1 @@
+Forge 1.20.1 double jump chestplate. REQUIRES INSTALL ON SERVER AND ALL CLIENTS. Recipe D D / NDN / NNN (D diamond, N netherite ingot). One additional Space jump per landing. Alpha build: validate in multiplayer. No existing WorldBattles mods replaced.
