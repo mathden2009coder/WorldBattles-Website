@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+[[mods]]
+modId="worldbattleszombiescleanup"
+version="0.1.0-ALPHA"
+displayName="WorldBattles Zombies Cleanup"
+description='''Clears remaining zombies in only the instance entering restore, without changing Arenas logic.'''
+[[dependencies.worldbattleszombiescleanup]]
+modId="forge"
+mandatory=true
+versionRange="[47.4.10,)"
+ordering="NONE"
+side="SERVER"
+[[dependencies.worldbattleszombiescleanup]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="SERVER"
+[[dependencies.worldbattleszombiescleanup]]
+modId="worldbattlesarenas"
+mandatory=true
+versionRange="[0,)"
+ordering="AFTER"
+side="SERVER"
