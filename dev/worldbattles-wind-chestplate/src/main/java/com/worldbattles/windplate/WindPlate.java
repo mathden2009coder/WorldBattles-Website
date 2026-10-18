@@ -31,7 +31,11 @@ public final class WindPlate {
   private static final SimpleChannel CHANNEL=NetworkRegistry.newSimpleChannel(
       new net.minecraft.resources.ResourceLocation(ID,"jump"),()->PROTOCOL,PROTOCOL::equals,PROTOCOL::equals);
   private static final DeferredRegister<Item> ITEMS=DeferredRegister.create(ForgeRegistries.ITEMS,ID);
-  public static final RegistryObject<Item> PLATE=ITEMS.register("wind_chestplate",()->new ArmorItem(ArmorMaterials.NETHERITE,ArmorItem.Type.CHESTPLATE,new Item.Properties().fireResistant()));
+  public static final RegistryObject<Item> PLATE=ITEMS.register("wind_chestplate",()->new ArmorItem(ArmorMaterials.NETHERITE,ArmorItem.Type.CHESTPLATE,new Item.Properties().fireResistant()){
+    @Override public String getArmorTexture(ItemStack stack, net.minecraft.world.entity.Entity entity, EquipmentSlot slot, String type){
+      return ID+":textures/models/armor/wind_layer_1.png";
+    }
+  });
   private static final Set<UUID> USED=new HashSet<>();
   public WindPlate(){
     IEventBus bus=FMLJavaModLoadingContext.get().getModEventBus();
