@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+[[mods]]
+modId="worldbattlesspawnexit"
+version="${file.jarVersion}"
+displayName="WorldBattles Spawn Exit"
+description='''Integrates /spawn with the existing per-instance leave routines in WorldBattles Arenas 0.4.1.'''
+[[dependencies.worldbattlesspawnexit]]
+modId="forge"
+mandatory=true
+versionRange="[47.4.10,)"
+ordering="NONE"
+side="SERVER"
+[[dependencies.worldbattlesspawnexit]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="SERVER"
+[[dependencies.worldbattlesspawnexit]]
+modId="worldbattlesarenas"
+mandatory=true
+versionRange="[0,)"
+ordering="AFTER"
+side="SERVER"
