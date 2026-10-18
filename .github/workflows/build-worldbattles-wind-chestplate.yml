@@ -24,6 +24,6 @@ jobs:
         run: gradle --no-daemon build --stacktrace
       - uses: actions/upload-artifact@v4
         with:
-          name: worldbattles-wind-chestplate-0.1.3-ALPHA
+          name: worldbattles-wind-chestplate-0.1.4-ALPHA
           path: dev/worldbattles-wind-chestplate/build/libs/*.jar
           if-no-files-found: error
