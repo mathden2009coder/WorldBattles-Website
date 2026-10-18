@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="All Rights Reserved"
 [[mods]]
 modId="worldbattleswindplate"
-version="0.1.3-ALPHA"
+version="0.1.4-ALPHA"
 displayName="WorldBattles Plastron du Vent"
 description='''Chestplate with an extra midair jump.'''
 [[dependencies.worldbattleswindplate]]
