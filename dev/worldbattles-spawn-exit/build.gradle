@@ -1,0 +1,7 @@
+plugins { id 'net.minecraftforge.gradle' version '[6.0,6.2)' }
+group='com.worldbattles'
+version='0.1.0-ALPHA'
+base { archivesName='worldbattles-spawn-exit' }
+java.toolchain.languageVersion=JavaLanguageVersion.of(17)
+minecraft { mappings channel:'official', version:'1.20.1' }
+dependencies { minecraft 'net.minecraftforge:forge:1.20.1-47.4.10' }
