@@ -1,0 +1,29 @@
+name: Build WorldBattles Plastron du Vent
+on:
+  push:
+    branches: [dev/worldbattles-wind-chestplate]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.8'
+      - name: Restore Minecraft PNG texture
+        working-directory: dev/worldbattles-wind-chestplate
+        run: base64 -d src/main/resources/assets/worldbattleswindplate/textures/item/wind_chestplate.png.base64 > src/main/resources/assets/worldbattleswindplate/textures/item/wind_chestplate.png
+      - name: Compile Forge mod
+        working-directory: dev/worldbattles-wind-chestplate
+        run: gradle --no-daemon build --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldbattles-wind-chestplate-0.1.0-ALPHA
+          path: dev/worldbattles-wind-chestplate/build/libs/*.jar
+          if-no-files-found: error
