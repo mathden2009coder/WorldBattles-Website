@@ -1,0 +1,20 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+[[mods]]
+modId="worldbattleswindplate"
+version="0.1.0-ALPHA"
+displayName="WorldBattles Plastron du Vent"
+description='''Chestplate with an extra midair jump.'''
+[[dependencies.worldbattleswindplate]]
+modId="forge"
+mandatory=true
+versionRange="[47.4.10,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.worldbattleswindplate]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="BOTH"
