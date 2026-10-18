@@ -1,0 +1,29 @@
+name: Build WorldBattles Zombies Cleanup
+on:
+  push:
+    branches: [dev/worldbattles-zombies-cleanup]
+    paths:
+      - 'dev/worldbattles-zombies-cleanup/**'
+      - '.github/workflows/build-worldbattles-zombies-cleanup.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.8'
+      - name: Compile Forge 1.20.1
+        working-directory: dev/worldbattles-zombies-cleanup
+        run: gradle --no-daemon build --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldbattles-zombies-cleanup-0.1.0-ALPHA
+          path: dev/worldbattles-zombies-cleanup/build/libs/*.jar
+          if-no-files-found: error
