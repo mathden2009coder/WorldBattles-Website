@@ -1,0 +1,2 @@
+# WorldBattles Lobby PvP 0.1.0
+Protect only player victims in Overworld X=0..31, Y=-60..-46, Z=10..40 inclusive from damage attributed by Minecraft DamageSource to a different player. Handles player-attributed projectiles (including vanilla arrows) through getEntity. No tick handlers, dimension changes or Arena/Protection changes. Server-side only. Nonplayer and unowned damage unaffected. Some third-party weapons that do not identify the attacking player may bypass the rule.
