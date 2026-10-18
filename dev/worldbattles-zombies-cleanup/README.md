@@ -1,0 +1,4 @@
+# WorldBattles Zombies Cleanup (test build)
+Forge 1.20.1, dedicated server only. Requires EXACT WorldBattles Arenas 0.4.1.
+Observes its actual Arena.phase CLEANING via reflection, once per transition, then discards surviving vanilla Zombie subclasses only within that instance bounding box. 3 arenas, each 300 blocks apart on X, original structure origin -142 -62 -12, size 65 10 101. Nothing else is killed. Does not initiate finishes or handle exits itself: existing Arenas/Spawn Exit decides when a match finishes. Does not touch SandWars / WorldsBattle.
+Do NOT run this on primary server before testing in a backed-up copy. If Arenas 0.4.1 phase names/fields change, plugin logs error and disables cleanup.
