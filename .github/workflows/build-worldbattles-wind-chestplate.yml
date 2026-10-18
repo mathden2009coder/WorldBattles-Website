@@ -16,9 +16,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.8'
-      - name: Restore Minecraft PNG texture
+      - name: Generate item and armor textures
         working-directory: dev/worldbattles-wind-chestplate
-        run: base64 -d src/main/resources/assets/worldbattleswindplate/textures/item/wind_chestplate.png.base64 > src/main/resources/assets/worldbattleswindplate/textures/item/wind_chestplate.png
+        run: python3 generate_textures.py
       - name: Compile Forge mod
         working-directory: dev/worldbattles-wind-chestplate
         run: gradle --no-daemon build --stacktrace
