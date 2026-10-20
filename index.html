@@ -3993,6 +3993,74 @@ html[lang="en"] .spa-page[data-route="jobs"] .row.milestone-v140 .lvl::after{con
 }
 .spa-page[data-route="world"] .wb-mode-card-v150[data-gallery-key-v150="worldsbattle"] .wb-mode-rules-short-v2026{border-left-color:rgba(110,231,183,.65)}
 </style>
+
+<style id="gallery-fixed-16x9-v130">
+/* V13.0 — Keep every gallery thumbnail and the full-screen viewer in a stable 16:9 frame. */
+.gallery-grid-v109 .gallery-photo-v109{
+  width:100% !important;
+  aspect-ratio:16 / 9 !important;
+  height:auto !important;
+  min-height:0 !important;
+  background-size:cover !important;
+  background-position:center center !important;
+  background-repeat:no-repeat !important;
+}
+.gallery-grid-v109.wb-gallery-scroll-v122 .gallery-photo-v109{
+  flex:0 0 calc((100% - 28px) / 3);
+  aspect-ratio:16 / 9 !important;
+  height:auto !important;
+  min-height:0 !important;
+}
+/* The viewer stage has a fixed ratio, so the navigation arrows never shift between images. */
+.img-lightbox-panel-v90{
+  width:min(94vw, calc(78vh * 16 / 9)) !important;
+  height:auto !important;
+  max-width:none !important;
+  max-height:none !important;
+  aspect-ratio:16 / 9 !important;
+  display:block !important;
+  overflow:visible !important;
+}
+.img-lightbox-stage-v107{
+  position:relative !important;
+  width:100% !important;
+  height:100% !important;
+  aspect-ratio:16 / 9 !important;
+  overflow:hidden !important;
+  margin:auto !important;
+  border-radius:10px;
+  background:#080d15;
+}
+.img-lightbox-image-v90{
+  display:block !important;
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  max-height:none !important;
+  object-fit:cover !important;
+  object-position:center center !important;
+  border-radius:10px !important;
+  box-shadow:none !important;
+  background:#080d15 !important;
+}
+.img-lightbox-nav-v107{
+  top:50% !important;
+  margin:0 !important;
+}
+@media(max-width:760px){
+  .gallery-grid-v109.wb-gallery-scroll-v122 .gallery-photo-v109{
+    flex-basis:min(82vw,420px);
+    aspect-ratio:16 / 9 !important;
+  }
+  .img-lightbox-panel-v90{
+    width:min(calc(100vw - 24px), calc(74vh * 16 / 9)) !important;
+    height:auto !important;
+    aspect-ratio:16 / 9 !important;
+  }
+  .img-lightbox-stage-v107{aspect-ratio:16 / 9 !important;}
+}
+</style>
+
 </head>
 <body>
 <header class="site-nav">
@@ -4198,7 +4266,18 @@ html[lang="en"] .spa-page[data-route="jobs"] .row.milestone-v140 .lvl::after{con
 <div class="mode-dashboard">
 <div class="dashboard-main"><h2>Deux cartes, deux styles</h2><p>La section combat du serveur mélange armes à feu, contrôle du terrain et arènes thématiques.</p>
 <div class="rule-list"><div class="rule"><i>01</i><span>SandWars oppose le sable au sable rouge.</span></div><div class="rule"><i>02</i><span>WorldsBattle oppose différents biomes de l’Overworld au Nether.</span></div><div class="rule"><i>03</i><span>Choisis ton camp avant de commencer le combat.</span></div></div></div>
-<div class="dashboard-side"><h2>Résumé</h2><div class="summary-tabs-v77"><button class="summary-tab-v77 active" data-summary-tab="resume" type="button">RÉSUMÉ</button><button class="summary-tab-v77" data-summary-tab="instructions" type="button">INSTRUCTIONS</button></div><div class="summary-panel-v77 active" data-summary-panel="resume"><div class="kpi-grid"><div class="kpi"><span>Cartes</span><b>2</b></div><div class="kpi"><span>Combat</span><b>Fusils</b></div><div class="kpi"><span>Style</span><b>Arènes</b></div></div><div class="tags"><span class="tag">PVP / COMBAT</span><span class="tag">SANDWARS</span><span class="tag">WORLDSBATTLE</span></div></div><div class="summary-panel-v77" data-summary-panel="instructions"><p class="summary-instructions-intro-v77">Pour lancer une partie proprement, suis simplement ces étapes :</p><div class="summary-steps-v77"><div class="summary-step-v77"><span class="summary-step-num-v77">01</span><span>Téléporte-toi vers l’arène de ton choix : WorldsBattle ou SandWars.</span></div><div class="summary-step-v77"><span class="summary-step-num-v77">02</span><span>Si tu veux jouer avec les monstres, active les mobs avant d’entrer. Sinon, laisse-les désactivés.</span></div><div class="summary-step-v77"><span class="summary-step-num-v77">03</span><span>Entre dans le mode, puis choisis ton camp.</span></div><div class="summary-step-v77"><span class="summary-step-num-v77">04</span><span>Joue la partie jusqu’à la victoire.</span></div><div class="summary-step-v77"><span class="summary-step-num-v77">05</span><span>Pour sortir, passe par la forteresse dans WorldsBattle ou par la porte principale dans SandWars.</span></div><div class="summary-step-v77"><span class="summary-step-num-v77">06</span><span>Si les monstres étaient activés, pense à les désactiver en sortant.</span></div><div class="summary-step-v77"><span class="summary-step-num-v77">07</span><span>Appuie sur le bouton avec la croix pour éliminer toutes les entités restantes.</span></div></div></div></div>
+<div class="dashboard-side"><h2>Résumé</h2><div class="summary-tabs-v77"><button class="summary-tab-v77 active" data-summary-tab="resume" type="button">RÉSUMÉ</button><button class="summary-tab-v77" data-summary-tab="instructions" type="button">INSTRUCTIONS</button></div><div class="summary-panel-v77 active" data-summary-panel="resume"><div class="kpi-grid"><div class="kpi"><span>Cartes</span><b>2</b></div><div class="kpi"><span>Combat</span><b>Fusils</b></div><div class="kpi"><span>Style</span><b>Arènes</b></div></div><div class="tags"><span class="tag">PVP / COMBAT</span><span class="tag">SANDWARS</span><span class="tag">WORLDSBATTLE</span></div></div><div class="summary-panel-v77" data-summary-panel="instructions">
+<p class="summary-instructions-intro-v77"><span class="wb-fr-v150">Les règles changent selon l’arène : vérifie les conditions de victoire avant de commencer.</span><span class="wb-en-v150">Rules differ by arena: check the win conditions before starting.</span></p>
+<div class="summary-steps-v77">
+<div class="summary-step-v77"><span class="summary-step-num-v77">01</span><span><span class="wb-fr-v150">Téléporte-toi vers WorldsBattle ou SandWars, entre dans l’arène et choisis ton camp.</span><span class="wb-en-v150">Teleport to WorldsBattle or SandWars, enter the arena, and choose your team.</span></span></div>
+<div class="summary-step-v77"><span class="summary-step-num-v77">02</span><span><span class="wb-fr-v150">WorldsBattle — Nether contre Overworld. Chaque élimination adverse rapporte 1 point à ton équipe. La première équipe à 25 kills gagne la manche ; 2 manches gagnées remportent la partie.</span><span class="wb-en-v150">WorldsBattle — Nether versus Overworld. Each enemy elimination scores 1 point for your team. The first team to 25 kills wins the round; win 2 rounds to take the match.</span></span></div>
+<div class="summary-step-v77"><span class="summary-step-num-v77">03</span><span><span class="wb-fr-v150">SandWars — sable contre sable rouge. Chaque joueur n’a qu’une vie par manche. Quand une équipe est entièrement éliminée, l’autre marque un point ; la première à gagner 3 manches remporte la partie.</span><span class="wb-en-v150">SandWars — sand versus red sand. Each player has one life per round. When a team is completely eliminated, the other team scores a point; the first team to win 3 rounds takes the match.</span></span></div>
+<div class="summary-step-v77"><span class="summary-step-num-v77">04</span><span><span class="wb-fr-v150">Les éliminations adverses affichent « ÉLIMINATION ! +1 kill ». Seules les éliminations de l’équipe ennemie comptent.</span><span class="wb-en-v150">Enemy eliminations display “ELIMINATION! +1 kill”. Only kills against the opposing team count.</span></span></div>
+<div class="summary-step-v77"><span class="summary-step-num-v77">05</span><span><span class="wb-fr-v150">Après une réapparition, tu bénéficies de 5 secondes d’invincibilité dans les deux modes.</span><span class="wb-en-v150">After respawning, you receive 5 seconds of invincibility in both modes.</span></span></div>
+<div class="summary-step-v77"><span class="summary-step-num-v77">06</span><span><span class="wb-fr-v150">Pour sortir, passe par la forteresse dans WorldsBattle ou par la porte principale dans SandWars.</span><span class="wb-en-v150">To leave, use the fortress exit in WorldsBattle or the main gate in SandWars.</span></span></div>
+<div class="summary-step-v77"><span class="summary-step-num-v77">07</span><span><span class="wb-fr-v150">Si tu as activé les mobs, désactive-les en quittant le mode.</span><span class="wb-en-v150">If you enabled mobs, turn them off when leaving the mode.</span></span></div>
+<div class="summary-step-v77"><span class="summary-step-num-v77">08</span><span><span class="wb-fr-v150">Utilise le bouton avec la croix pour supprimer les entités restantes après la partie.</span><span class="wb-en-v150">Use the button marked with a cross to remove any remaining entities after the match.</span></span></div>
+</div></div></div>
 </div></div></section>
 <section class="arsenal-promo-v151 arsenal-promo-world-v151 wb-arsenal-promo-v157">
 <div class="wb-arsenal-v157-left">
