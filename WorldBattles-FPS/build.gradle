@@ -1,0 +1,32 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+group = 'com.worldbattles.fps'
+version = '1.0.0'
+base { archivesName = 'WorldBattles-FPS-Forge-1.20.1' }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach { workingDirectory project.file('run') }
+        client { property 'forge.logging.console.level', 'info'; mods { worldbattlesfps { source sourceSets.main } } }
+        server { property 'forge.logging.console.level', 'info'; mods { worldbattlesfps { source sourceSets.main } } }
+    }
+}
+
+dependencies { minecraft 'net.minecraftforge:forge:1.20.1-47.4.28' }
+
+processResources {
+    def replaceProperties = [mod_id: 'worldbattlesfps', mod_name: 'WorldBattles FPS', mod_license: 'MIT', mod_version: project.version, mod_authors: 'WorldBattles', mod_description: 'Client-side WorldBattles styled FPS counter.']
+    inputs.properties replaceProperties
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) { expand replaceProperties }
+}
+
+jar { manifest { attributes(['Specification-Title': 'WorldBattles FPS', 'Specification-Vendor': 'WorldBattles', 'Specification-Version': '1', 'Implementation-Title': project.name, 'Implementation-Version': project.version]) } }
