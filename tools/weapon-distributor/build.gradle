@@ -1,0 +1,46 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+group = 'com.worldbattles'
+version = '0.1.0-test'
+base.archivesName = 'worldbattles-weapon-distributor'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            mods { worldbattlesweapons { source sourceSets.main } }
+        }
+        server { }
+        client { }
+    }
+}
+
+repositories { mavenCentral() }
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
+    // TACZ is accessed reflectively; the build does not redistribute its large mod JAR.
+}
+
+jar {
+    manifest {
+        attributes([
+            'Specification-Title': 'WorldBattles Weapon Distributor',
+            'Specification-Vendor': 'WorldBattles',
+            'Specification-Version': '1',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version
+        ])
+    }
+}
+jar.finalizedBy('reobfJar')
