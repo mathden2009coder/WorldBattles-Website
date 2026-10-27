@@ -1,0 +1,32 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+[[mods]]
+modId="worldbattlesweapons"
+version="${file.jarVersion}"
+displayName="WorldBattles Weapon Distributor"
+description='''TEST BUILD. Distributes selected TACZ weapons in existing WorldBattles modes. Requires TACZ and WorldBattles Arenas.'''
+[[dependencies.worldbattlesweapons]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="AFTER"
+side="BOTH"
+[[dependencies.worldbattlesweapons]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.worldbattlesweapons]]
+modId="tacz"
+mandatory=true
+versionRange="[1.1.8,)"
+ordering="AFTER"
+side="BOTH"
+[[dependencies.worldbattlesweapons]]
+modId="worldbattlesarenas"
+mandatory=true
+versionRange="[0.4.1,)"
+ordering="AFTER"
+side="BOTH"
