@@ -178,7 +178,7 @@ public final class WorldBattlesWeaponDistributor {
         ItemStack box = createAmmoBox(spec, mode);
         if (box.isEmpty()) return;
         player.getInventory().setItem(1, box);
-        player.getInventory().setSelected(0);
+        player.getInventory().selected = 0;
         LAST_GUN.put(player.getUUID(), spec.id());
         LOG.info("Assigned TACZ gun {} with ammo {} to {} in {}", spec.id(), spec.ammo(), player.getGameProfile().getName(), mode);
     }
