@@ -1,0 +1,1 @@
+Build trigger for WorldBattles Weapon Distributor test mod.
