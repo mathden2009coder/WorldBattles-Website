@@ -1,3 +1,5 @@
 Build trigger for WorldBattles Weapon Distributor test mod. Revision: 2. Trigger CI after metadata compatibility fix.
 
 Rebuild after selected-slot fix: ff42fe5
+
+Fix event bus registration: f03c7514d91df3910e4cfd373e4df3b3f4b1c6d5
