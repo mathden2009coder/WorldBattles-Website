@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 @Mod("worldbattlesweapons")
+@Mod.EventBusSubscriber(modid = "worldbattlesweapons", bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class WorldBattlesWeaponDistributor {
     private static final Logger LOG = LogUtils.getLogger();
     private static final String ARENAS = "com.worldbattles.arenas.WorldBattlesArenas";
