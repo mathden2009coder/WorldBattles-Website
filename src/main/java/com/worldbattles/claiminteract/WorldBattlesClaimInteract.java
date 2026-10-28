@@ -17,7 +17,9 @@ import net.minecraftforge.fml.common.Mod;
 @Mod(WorldBattlesClaimInteract.MODID)
 public final class WorldBattlesClaimInteract {
     public static final String MODID = "worldbattlesclaiminteract";
-    private WorldBattlesClaimInteract() {}
+
+    // Forge instantiates the class reflectively, so this constructor must be public.
+    public WorldBattlesClaimInteract() {}
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static final class Events {
