@@ -132,6 +132,15 @@ public final class WorldBattlesWeaponDistributor {
             Object excludedValue = excludedField == null ? null : field(match, excludedField);
             excluded = excludedValue instanceof Set<?> set ? set : Set.of();
 
+            // If a match is active but has only one participant left, invoke the arena
+            // manager's own cancellation/finish routine. It handles returning players to lobby spawn
+            // and resetting the match state, unlike a raw teleport that would leave the match active.
+            if ("ACTIVE".equals(phase) && participants.size() <= 1
+                && (mode == Mode.WORLDBATTLE || mode == Mode.SANDWARS)) {
+                invokeNoArgs(match, "cancelIfAlone");
+                phase = String.valueOf(field(match, "phase"));
+            }
+
             // Never leave TACZ weapons visible in the waiting room / map-loading phase.
             if (!"ACTIVE".equals(phase)) {
                 for (UUID id : participants) {
