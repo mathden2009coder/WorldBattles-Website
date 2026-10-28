@@ -3,3 +3,4 @@ Build trigger for WorldBattles Weapon Distributor test mod. Revision: 2. Trigger
 Rebuild after selected-slot fix: ff42fe5
 
 Fix event bus registration: f03c7514d91df3910e4cfd373e4df3b3f4b1c6d5
+Fix WorldBattle respawn grants and remove TACZ gun/ammo box while match is not ACTIVE (commit 7a511940967a95e63284d36b776bb5d658eebbdb)
