@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -75,6 +76,16 @@ public final class WorldBattlesWeaponDistributor {
         clearInventory(player);
         // SandWars marks a player eliminated until the next round; don't grant a mid-round weapon.
         if (mode == Mode.ZOMBIES) PENDING.put(player.getUUID(), new PendingGrant(mode, ticks + 3));
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        // WorldBattle players respawn during the same round. Re-schedule the loadout on the
+        // actual respawn event, because LivingDeathEvent can run before the arena's respawn flow.
+        if (isMember(WORLDBATTLE, "MATCHES", player.getUUID(), "teams")) {
+            PENDING.put(player.getUUID(), new PendingGrant(Mode.WORLDBATTLE, ticks + 3));
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
