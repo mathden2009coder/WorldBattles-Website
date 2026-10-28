@@ -292,6 +292,17 @@ public final class WorldBattlesWeaponDistributor {
         player.containerMenu.broadcastChanges();
     }
 
+    private static void invokeNoArgs(Object target, String name) {
+        if (target == null) return;
+        try {
+            Method method = target.getClass().getDeclaredMethod(name);
+            method.setAccessible(true);
+            method.invoke(target);
+        } catch (ReflectiveOperationException | LinkageError ex) {
+            LOG.warn("Could not invoke arena recovery method {}", name, ex);
+        }
+    }
+
     private static Object staticField(String className, String name) {
         try {
             Class<?> type = Class.forName(className);
