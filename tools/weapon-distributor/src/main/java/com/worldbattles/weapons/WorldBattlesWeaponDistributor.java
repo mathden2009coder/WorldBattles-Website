@@ -62,11 +62,19 @@ public final class WorldBattlesWeaponDistributor {
     public static void onDeath(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         Mode mode = activeMode(player.getUUID());
+        // The arena manager can change phase / respawn state before this event is processed.
+        // For WorldBattle, retain membership-based detection so a death still schedules a new gun.
+        if (mode == null && isMember(WORLDBATTLE, "MATCHES", player.getUUID(), "teams")) {
+            mode = Mode.WORLDBATTLE;
+        }
         if (mode == null) return;
 
+        if (mode == Mode.WORLDBATTLE) {
+            PENDING.put(player.getUUID(), new PendingGrant(mode, ticks + 3));
+        }
         clearInventory(player);
         // SandWars marks a player eliminated until the next round; don't grant a mid-round weapon.
-        if (mode != Mode.SANDWARS) PENDING.put(player.getUUID(), new PendingGrant(mode, ticks + 3));
+        if (mode == Mode.ZOMBIES) PENDING.put(player.getUUID(), new PendingGrant(mode, ticks + 3));
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -120,10 +128,17 @@ public final class WorldBattlesWeaponDistributor {
             Snapshot previous = SNAPSHOTS.computeIfAbsent(match, ignored -> new Snapshot());
             boolean enteredActive = "ACTIVE".equals(phase) && !"ACTIVE".equals(previous.phase);
             boolean advanced = "ACTIVE".equals(phase) && "ACTIVE".equals(previous.phase) && count != previous.count;
-            if (enteredActive || advanced) {
-                Collection<UUID> participants = participantIds(field(match, participantsField));
-                Object excludedValue = excludedField == null ? null : field(match, excludedField);
-                excluded = excludedValue instanceof Set<?> set ? set : Set.of();
+            Collection<UUID> participants = participantIds(field(match, participantsField));
+            Object excludedValue = excludedField == null ? null : field(match, excludedField);
+            excluded = excludedValue instanceof Set<?> set ? set : Set.of();
+
+            // Never leave TACZ weapons visible in the waiting room / map-loading phase.
+            if (!"ACTIVE".equals(phase)) {
+                for (UUID id : participants) {
+                    ServerPlayer player = server.getPlayerList().getPlayer(id);
+                    if (player != null) removeTaczLoadoutItems(player);
+                }
+            } else if (enteredActive || advanced) {
                 for (UUID id : participants) {
                     if (excluded.contains(id)) continue;
                     ServerPlayer player = server.getPlayerList().getPlayer(id);
@@ -148,11 +163,40 @@ public final class WorldBattlesWeaponDistributor {
         for (int i = 0; i < Array.getLength(array); i++) {
             Object match = Array.get(array, i);
             if (match == null || !"ACTIVE".equals(String.valueOf(field(match, "phase")))) continue;
-            Object participants = field(match, participantsField);
-            if (participants instanceof Map<?, ?> map && map.containsKey(uuid)) return true;
-            if (participants instanceof Collection<?> collection && collection.contains(uuid)) return true;
+            if (containsMember(field(match, participantsField), uuid)) return true;
         }
         return false;
+    }
+
+    private static boolean isMember(String owner, String arrayName, UUID uuid, String participantsField) {
+        Object array = staticField(owner, arrayName);
+        if (array == null || !array.getClass().isArray()) return false;
+        for (int i = 0; i < Array.getLength(array); i++) {
+            Object match = Array.get(array, i);
+            if (match != null && containsMember(field(match, participantsField), uuid)) return true;
+        }
+        return false;
+    }
+
+    private static boolean containsMember(Object participants, UUID uuid) {
+        if (participants instanceof Map<?, ?> map) return map.containsKey(uuid);
+        if (participants instanceof Collection<?> collection) return collection.contains(uuid);
+        return false;
+    }
+
+    private static void removeTaczLoadoutItems(ServerPlayer player) {
+        boolean changed = false;
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            if (stack.isEmpty()) continue;
+            ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+            if (id != null && "tacz".equals(id.getNamespace())
+                && ("modern_kinetic_gun".equals(id.getPath()) || "ammo_box".equals(id.getPath()))) {
+                player.getInventory().setItem(i, ItemStack.EMPTY);
+                changed = true;
+            }
+        }
+        if (changed) player.containerMenu.broadcastChanges();
     }
 
     private static Collection<UUID> participantIds(Object value) {
